@@ -1,0 +1,11 @@
+numpy
+matplotlib
+astropy
+scipy
+sympy
+setuptools
+PyQt6
+emcee
+corner
+tqdm
+scikit-learn
