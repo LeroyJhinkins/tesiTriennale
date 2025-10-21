@@ -1,0 +1,64 @@
+<?xml version='1.0' encoding='utf-8'?>
+<two:DpdLE3gcTwoPointRecAutoCorrPol xmlns:two="http://ecdm.euclid-ec.org/schema/dpd/le3/gc/twopcfrecautopol">
+  <Header>
+    <ProductId>f27738ca-0108-40dc-9794-b266c7b648b9</ProductId>
+    <ProductType>DpdLE3gcTwoPointRecAutoCorrPol</ProductType>
+    <SoftwareName>LE3_GC_TwoPointCorrelation</SoftwareName>
+    <SoftwareRelease>4.1</SoftwareRelease>
+    <EuclidPipelineSoftwareRelease>UNKNOWN</EuclidPipelineSoftwareRelease>
+    <ProdSDC>SDC-IT</ProdSDC>
+    <DataSetRelease>UNKNOWN</DataSetRelease>
+    <Purpose>UNKNOWN</Purpose>
+    <PlanId>UNKNOWN</PlanId>
+    <PPOId>UNKNOWN</PPOId>
+    <PipelineDefinitionId>UNKNOWN</PipelineDefinitionId>
+    <PpoStatus>NA</PpoStatus>
+    <ManualValidationStatus>UNKNOWN</ManualValidationStatus>
+    <ProductNotifiedToBeChecked>UNKNOWN</ProductNotifiedToBeChecked>
+    <AutomatedValidationStatus>UNKNOWN</AutomatedValidationStatus>
+    <ExpirationDate>1970-01-01T00:00:00.000Z</ExpirationDate>
+    <ToBePublished>0</ToBePublished>
+    <Published>0</Published>
+    <Curator>LE3-GC</Curator>
+    <CreationDate>2025-04-03T18:18:50.683130Z</CreationDate>
+  </Header>
+  <Data>
+    <DataCatalog>EuclidLargeMocks_ZAreconstructed_Lightcone_HOD003_z1_Catalog_DR_30de</DataCatalog>
+    <RandCatalogR>random_PDFz_EuclidLargeBox0001-1000_Rot30degCircle_m3_nosm_obsz_50x_</RandCatalogR>
+    <RandCatalogS>random_PDFz_EuclidLargeBox0001-1000_Rot30degCircle_m3_nosm_obsz_50x_</RandCatalogS>
+    <RunType>undefined</RunType>
+    <SelectionID>undefined</SelectionID>
+    <Statistics>MULTIPOLE</Statistics>
+    <CountingMethod>LINKED_LIST</CountingMethod>
+    <BinTypeDim1>LIN</BinTypeDim1>
+    <BinNumberDim1>200</BinNumberDim1>
+    <BinMinValueDim1>0.0</BinMinValueDim1>
+    <BinMaxValueDim1>200.0</BinMaxValueDim1>
+    <BinTypeDim2>LIN</BinTypeDim2>
+    <BinNumberDim2>200</BinNumberDim2>
+    <BinMinValueDim2>1.0</BinMinValueDim2>
+    <BinMaxValueDim2>1.0</BinMaxValueDim2>
+    <UseWeight>false</UseWeight>
+    <SplitFactor>50</SplitFactor>
+    <ReconstructionID>undefined</ReconstructionID>
+    <CosmologyID>LCDM</CosmologyID>
+    <ReleaseName>undefined</ReleaseName>
+    <LosDef>bisector</LosDef>
+    <PairsFile format="le3.gc.2pcf.auto.rec.pair.2D" version="0.3">
+      <DataContainer filestatus="PROPOSED">
+        <FileName>EUC_LE3_GCL_2PCF__PAIRS_AUTO_REC_2DPOL_20250403T181849.0Z.fits</FileName>
+      </DataContainer>
+    </PairsFile>
+    <CorrelationFile format="le3.gc.2pcf.auto.rec.corr.2D" version="0.3">
+      <DataContainer filestatus="PROPOSED">
+        <FileName>EUC_LE3_GCL_2PCF__Correlation_AUTO_REC_2DPOL_20250403T181849.0Z.fits</FileName>
+      </DataContainer>
+    </CorrelationFile>
+    <CorrelationFileProjected format="le3.gc.2pcf.auto.rec.corr.mul" version="0.3">
+      <DataContainer filestatus="PROPOSED">
+        <FileName>EUC_LE3_GCL_2PCF__Correlation_MULTIPOLES_20250403T181849.0Z.fits</FileName>
+      </DataContainer>
+    </CorrelationFileProjected>
+    <Blinding></Blinding>
+  </Data>
+</two:DpdLE3gcTwoPointRecAutoCorrPol>
