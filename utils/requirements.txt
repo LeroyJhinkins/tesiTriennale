@@ -9,3 +9,4 @@ emcee
 corner
 tqdm
 scikit-learn
+basemap
