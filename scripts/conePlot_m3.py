@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 from astropy.io import fits
+from astropy.cosmology import Planck18 as cosmo
 
 plt.rcParams.update({'font.size': 14})
 plt.rcParams['text.usetex'] = True  # use real LaTeX
@@ -47,20 +48,23 @@ RA_MAX = 90
 mask = (dec_array > DEC_MIN) & (dec_array < DEC_MAX) & (ra_array > RA_MIN) & (ra_array < RA_MAX)
 
 ra_slice = ra_array[mask]
-z_slice = z_array[mask]
 ra_slice_rad = ra_slice * np.pi / 180.0
+z_slice = z_array[mask]
+Dc_slice = cosmo.comoving_distance(z_slice).value  # in Mpc
 
 Z_MIN = np.min(z_slice)
 Z_MAX = np.max(z_slice)
+DC_MIN = np.min(Dc_slice)
+DC_MAX = np.max(Dc_slice)
 
 print(f"\nPlotting {len(ra_slice)} galaxies...")
 
 # scatter plot --------------------------------------------------------------------------------------------------------------------
-fig, ax = plt.subplots(figsize=(13, 8), subplot_kw={'projection': 'polar'}, num="Wedge plot")
+fig, ax = plt.subplots(figsize=(8, 8), subplot_kw={'projection': 'polar'}, num="Wedge plot")
 
 sc = ax.scatter(
     ra_slice_rad,
-    z_slice,
+    Dc_slice,
     c='black',
     s=1,
     alpha=0.2,
@@ -73,31 +77,45 @@ ax.set_theta_direction(-1)
 
 # custom ticks
 theta_ticks = np.linspace(np.min(ra_slice_rad), np.max(ra_slice_rad), 5)
-r_ticks = np.concatenate([
+z_ticks = np.concatenate([
     np.linspace(0, Z_MIN, 6, endpoint=False),
     np.linspace(Z_MIN, Z_MAX, 4)
 ])
+Dc_ticks = cosmo.comoving_distance(z_ticks).value
 
 ax.set_xticks(theta_ticks)
 ax.set_xticklabels([f"{np.degrees(t):.0f}°" for t in theta_ticks])
-ax.set_yticks(r_ticks)
-ax.set_yticklabels([f"{t:.2f}" for t in r_ticks])
+ax.set_yticks(Dc_ticks) # right position for redshift ticks (expressed in comoving distance) [left edge of the plot]
+ax.set_yticklabels([f"{t:.2f}" for t in z_ticks]) # redshift ticks
 
-# placing radial labels just after RA_max
-offset_deg = 15  # tweak for spacing
-# ax.set_rlabel_position((np.max(ra_slice_rad)) + np.deg2rad(offset_deg))
+x_right = Dc_ticks * np.cos(np.radians(RA_MAX))
+y_right = Dc_ticks * np.sin(np.radians(RA_MAX))
+offset = 0.02 * np.max(Dc_ticks)
+x_label = x_right + offset * np.cos(np.radians(RA_MAX+90))
+y_label = y_right + offset * np.sin(np.radians(RA_MAX+90))
+
+for r, x, y in zip(Dc_ticks, x_label, y_label): # comoving distance ticks [right edge of the plot]
+    ax.text(
+        np.arctan2(y,x),
+        np.sqrt(x**2 + y**2),
+        f"{r/1000:.1f}",
+        ha='center',
+        va='center',
+        fontsize= plt.rcParams['font.size'] - 4,
+    )
+
 
 # limits
 ax.set_thetalim(RA_MIN * np.pi / 180.0, RA_MAX * np.pi / 180.0)
-# ax.set_rlim(0, Z_MAX)
+# ax.set_rlim(0, DC_MAX)
 
 ax.tick_params(axis='x', pad=10)
 ax.tick_params(axis='y', pad=5)
 
 # axis labels
-r_for_theta_label = Z_MAX * 1.15
+offset_deg = 15  # tweak for spacing
+r_for_theta_label = DC_MAX * 1.15
 theta_for_theta_label = np.mean([np.min(ra_slice_rad), np.max(ra_slice_rad)])
-
 ax.text(
     theta_for_theta_label,
     r_for_theta_label,
@@ -109,20 +127,34 @@ ax.text(
     fontsize=14,
 )
 
-theta_for_r_label = np.min(ra_slice_rad) - np.radians(offset_deg)
-r_for_r_label = 0.5 * Z_MAX
-
+theta_for_z_label = np.min(ra_slice_rad)
+r_for_z_label = 0.5 * DC_MAX
 ax.text(
-    theta_for_r_label,
-    r_for_r_label,
+    theta_for_z_label - np.radians(offset_deg),
+    r_for_z_label,
     "Redshift $z$",
     ha='left',
     va='center',
-    rotation= 90 - np.degrees(np.min(ra_slice_rad)), # radial alignment
+    rotation= 90 - np.degrees(theta_for_z_label), # radial alignment
+    rotation_mode='anchor',
+    fontsize=14,
+)
+
+theta_for_Dc_label = np.max(ra_slice_rad)
+r_for_Dc_label = 0.5 * DC_MAX
+ax.text(
+    theta_for_Dc_label + np.radians(offset_deg - 5),
+    r_for_Dc_label,
+    "Comoving Distance $D_c$ ($10^3$ Mpc)",
+    ha='center',
+    va='center',
+    rotation= 90 - np.degrees(theta_for_Dc_label), # radial alignment
     rotation_mode='anchor',
     fontsize=14,
 )
 
 ax.set_title('Wedge diagram within %1.1f$^\circ$ $\leq$ DEC $\leq$ %1.1f$^\circ$' % (DEC_MIN, DEC_MAX), fontsize=16, pad=20) # type: ignore
+
+plt.savefig("graphs/conePlot_m3/conePlot.pdf", dpi=600)
 
 plt.show()
