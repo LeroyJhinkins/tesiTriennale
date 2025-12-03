@@ -2,6 +2,9 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 from libs import ReadFITS as read
+from libs import ClusteringWedges as wdg
+from libs import Multipoles as mp
+from libs import BiMaps as bm
 plt.rcParams.update({'font.size': 14})
 plt.rcParams['text.usetex'] = True  # use real LaTeX
 plt.rcParams['text.latex.preamble'] = r'\usepackage{siunitx}'  # use siunitx
@@ -17,12 +20,15 @@ matplotlib.rcParams['toolbar'] = 'None' # disabling window bars
 nFiles = 1000
 nElements = 40000
 
-print("\nReading measured files...")
-s_matrix_measured, mu_matrix_measured, xi_matrix_measured = read.readFITS_auto_series_SMU("data/z1_data/z1_measured", nFiles, nElements)
+print(f"\nReading {nFiles} measured files...")
+s_matrix_measured, mu_matrix_measured, xi_matrix_measured = read.readFITS_auto_series_SMU("data/z1_data/z1_measured",
+                                                                                          nFiles, nElements)
 
-print("Reading correct files...")
-s_matrix_correct, mu_matrix_correct, xi_matrix_correct = read.readFITS_auto_series_SMU("data/z1_data/z1_correct", nFiles, nElements)
+print(f"Reading {nFiles} correct files...")
+s_matrix_correct, mu_matrix_correct, xi_matrix_correct = read.readFITS_auto_series_SMU("data/z1_data/z1_correct",
+                                                                                       nFiles, nElements)
 
+print()
 
 # compute mean --------------------------------------------------------------------------------------------------------------------
 # we want to get rid of statistical errors in order to emphasize the systematical error
@@ -43,56 +49,23 @@ xiMean_array_correct = np.mean(xi_matrix_correct, axis=0)
 if np.allclose(muMean_array_measured, muMean_array_correct, atol=1e-4) and \
     np.allclose(sMean_array_measured, sMean_array_correct, atol=1e-4): # this should always be true
 
-    mu_unique = np.unique(muMean_array_measured)
-    s_unique = np.unique(sMean_array_measured)
-    
-    MU, S = np.meshgrid(mu_unique, s_unique)
-    XI_MEASURED = xiMean_array_measured.reshape((len(mu_unique), len(s_unique)))
-    XI_CORRECT = xiMean_array_correct.reshape((len(mu_unique), len(s_unique)))
-
     # plot measured
-    plt.figure(figsize=(9,8), num="2D map (mu, s) measured")
-    contourSMU_measured = plt.contourf(MU, S, XI_MEASURED, levels=20, cmap='turbo')
-    
-    cbarSMU_measured = plt.colorbar(contourSMU_measured, label=r'$\xi^\mathrm{measured}(\mu, s)$')
-    xi_measured_ticks = np.linspace(np.min(xiMean_array_measured), np.max(xiMean_array_measured), 9)
-    cbarSMU_measured.set_ticks(xi_measured_ticks)
-    cbarSMU_measured.set_ticklabels([f"{tick:.2f}" for tick in xi_measured_ticks])
-
-    mu_ticks = np.linspace(np.min(mu_unique), np.max(mu_unique), 5)
-    s_ticks = np.linspace(np.min(s_unique), np.max(s_unique), 6)
-    plt.xticks(mu_ticks, [f"{tick:.0f}" for tick in mu_ticks])
-    plt.yticks(s_ticks, [f"{tick:.0f}" for tick in s_ticks])
-
-    # plt.xlim(0, 15)
-    # plt.ylim(0, 15)
-
-    plt.xlabel(r'$\mu$')
-    plt.ylabel(r'$s \,(h^{-1} \, \mathrm{Mpc})$')
-    plt.title(r'2D map of $\xi^\mathrm{measured}(\mu, s)$')
-    plt.tight_layout()
-    plt.savefig("graphs/z1/2DmapSMU_measured.pdf", dpi=600)
+    MU, S, _ = bm.plot_contourf(coords= "SMU",
+                                x_array= muMean_array_measured,
+                                y_array= sMean_array_measured,
+                                z_array= xiMean_array_measured,
+                                base_path= "graphs/z1",
+                                kind= "measured",
+                                draw_lines=False)
 
     # plot correct
-    plt.figure(figsize=(9,8), num="2D map (r_p, pi) correct")
-    contourSMU_correct = plt.contourf(MU, S, XI_CORRECT, levels=20, cmap='turbo')
-    
-    cbarSMU_corret = plt.colorbar(contourSMU_correct, label=r'$\xi^\mathrm{correct}(r_p, \pi)$')
-    xi_ticks_correct = np.linspace(np.min(xiMean_array_correct), np.max(xiMean_array_correct), 9)
-    cbarSMU_corret.set_ticks(xi_ticks_correct)
-    cbarSMU_corret.set_ticklabels([f"{tick:.2f}" for tick in xi_ticks_correct])
-
-    plt.xticks(mu_ticks, [f"{tick:.0f}" for tick in mu_ticks])
-    plt.yticks(s_ticks, [f"{tick:.0f}" for tick in s_ticks])
-    
-    # plt.xlim(0, 15)
-    # plt.ylim(0, 15)
-
-    plt.xlabel(r'$\mu$')
-    plt.ylabel(r'$s \,(h^{-1} \, \mathrm{Mpc})$')
-    plt.title(r'2D map of $\xi^\mathrm{correct}(\mu, s)$')
-    plt.tight_layout()
-    plt.savefig("graphs/z1/2DmapSMU_correct.pdf", dpi=600)
+    bm.plot_contourf(coords= "SMU",
+                     x_array= muMean_array_correct,
+                     y_array= sMean_array_correct,
+                     z_array= xiMean_array_correct,
+                     base_path= "graphs/z1",
+                     kind="correct",
+                     draw_lines=False)
 
 else:
     raise RuntimeError("r_p and pi from measured and correct files are not compatible")
@@ -102,60 +75,52 @@ else:
 # we want to see the effects of interlopers
 # so we compute measured/correct ratio to tell the difference between the two
 # plot in s and mu
+xiMean_ratio = bm.plot_contourf_ratio(coords= "SMU",
+                                      x_array= muMean_array_measured,
+                                      y_array= sMean_array_measured,
+                                      z_array_measured= xiMean_array_measured,
+                                      z_array_correct= xiMean_array_correct,
+                                      base_path= "graphs/z1",
+                                      v_min= -1.5,
+                                      v_max= 1.5,
+                                      z_max= 2)
 
-xi_ratio = xiMean_array_measured / xiMean_array_correct
-
-MU, S = np.meshgrid(mu_unique, s_unique)
-XI_RATIO = xi_ratio.reshape(len(s_unique), len(mu_unique))
-
-plt.figure(figsize=(9,8), num="Ratio (mu, s)")
-contourMUS = plt.contourf(MU, S, XI_RATIO, levels=20, cmap='turbo')
-
-cbarMUS = plt.colorbar(contourMUS, label=r'$\frac{\xi_\mathrm{measured}}{\xi_\mathrm{correct}}$')
-xi_ticks = np.linspace(np.min(xi_ratio), np.max(xi_ratio), 9)
-cbarMUS.set_ticks(xi_ticks)
-cbarMUS.set_ticklabels([f"{tick:.2f}" for tick in xi_ticks])
-
-s_ticks = np.linspace(np.min(s_unique), np.max(s_unique), 6)
-mu_ticks = np.linspace(np.min(mu_unique), np.max(mu_unique), 5)
-plt.xticks(mu_ticks, [f"{tick:.0f}" for tick in mu_ticks])
-plt.yticks(s_ticks, [f"{tick:.0f}" for tick in s_ticks])
-    
-# plt.xlim(0, np.max(mu_unique))
-# plt.ylim(0, 10)
-
-plt.xlabel(r'$\mu$')
-plt.ylabel(r'$s \,(h^{-1} \, \mathrm{Mpc})$')
-plt.title(r'2D map of $\frac{\xi_\mathrm{measured}}{\xi_\mathrm{correct}}(\mu,s)$')
-plt.savefig("graphs/z1/2DmapSMU_ratio.pdf", dpi=600)
-
+xiMean_ratio = bm.plot_imshow_ratio(coords= "SMU",
+                                    x_array= muMean_array_measured,
+                                    y_array= sMean_array_measured,
+                                    z_array_measured= xiMean_array_measured,
+                                    z_array_correct= xiMean_array_correct,
+                                    base_path= "graphs/z1",
+                                    v_min= -1.5,
+                                    v_max= 1.5,
+                                    z_max= 2)
 
 # plot in r_p and pi
-RP = S * np.sqrt(1 - MU**2)
-PI = S * MU
+# RP = S * np.sqrt(1 - MU**2)
+# PI = S * MU
 
-plt.figure(figsize=(9,8), num="Ratio (r_p, pi)")
-contourRpPI = plt.contourf(RP, PI, np.log(np.abs(XI_RATIO)), levels=20, cmap='turbo') # we use log to better observe differences in levels
-                                                                                      # abs is for avoiding log of negative numbers
+# plt.figure(figsize=(9,8), num="Ratio (r_p, pi)")
+# contourRpPI = plt.contourf(RP, PI, np.log(np.abs(XI_RATIO)), levels=20, cmap='turbo') # we use log to better observe differences in levels
+#                                                                                       # abs is for avoiding log of negative numbers
 
-cbarRpPI = plt.colorbar(contourRpPI, label=r'$\frac{\xi_\mathrm{measured}}{\xi_\mathrm{correct}}$')
-xi_interpol_ticks = np.linspace(np.min(np.log(np.abs(xi_ratio))), np.max(np.log(np.abs(xi_ratio))), 9)
-cbarRpPI.set_ticks(xi_interpol_ticks)
-cbarRpPI.set_ticklabels([f"{tick:.3f}" for tick in xi_interpol_ticks])
+# cbarRpPI = plt.colorbar(contourRpPI, label=r'$\frac{\xi_\mathrm{measured}}{\xi_\mathrm{correct}}$')
+# xi_interpol_ticks = np.linspace(np.min(np.log(np.abs(xi_ratio))), np.max(np.log(np.abs(xi_ratio))), 9)
+# cbarRpPI.set_ticks(xi_interpol_ticks)
+# cbarRpPI.set_ticklabels([f"{tick:.3f}" for tick in xi_interpol_ticks])
 
-rp_ticks = np.linspace(np.min(RP), np.max(RP), 10)
-pi_ticks = np.linspace(np.min(PI), np.max(PI), 10)
-plt.xticks(rp_ticks, [f"{tick:.0f}" for tick in rp_ticks])
-plt.yticks(pi_ticks, [f"{tick:.0f}" for tick in pi_ticks])
+# rp_ticks = np.linspace(np.min(RP), np.max(RP), 10)
+# pi_ticks = np.linspace(np.min(PI), np.max(PI), 10)
+# plt.xticks(rp_ticks, [f"{tick:.0f}" for tick in rp_ticks])
+# plt.yticks(pi_ticks, [f"{tick:.0f}" for tick in pi_ticks])
 
-# plt.xlim(0,30)
-# plt.ylim(-15,15)
+# # plt.xlim(0,30)
+# # plt.ylim(-15,15)
 
-plt.xlabel(r'$r_p \,(h^{-1} \, \mathrm{Mpc})$')
-plt.ylabel(r'$\pi \,(h^{-1} \, \mathrm{Mpc})$')
-plt.title(r'2D map of $\frac{\xi_\mathrm{measured}}{\xi_\mathrm{correct}}(r_p, \pi)$')
-plt.tight_layout()
-plt.savefig("graphs/z1/2DmapRpPI_ratio.pdf", dpi=600)
+# plt.xlabel(r'$r_p \,(h^{-1} \, \mathrm{Mpc})$')
+# plt.ylabel(r'$\pi \,(h^{-1} \, \mathrm{Mpc})$')
+# plt.title(r'2D map of $\frac{\xi_\mathrm{measured}}{\xi_\mathrm{correct}}(r_p, \pi)$')
+# plt.tight_layout()
+# plt.savefig("graphs/z1/2DmapRpPI_ratio.pdf", dpi=600)
 
 
 # custering wedges ----------------------------------------------------------------------------------------------------------------
@@ -164,84 +129,151 @@ plt.savefig("graphs/z1/2DmapRpPI_ratio.pdf", dpi=600)
 # however we have -1 < mu < 1
 # but for galaxies pairs the correlation function should be symmetrical xi(s,mu) = xi(s,-mu) --> I verified it's true
 
-def clusteringWedges(s_array: np.ndarray, mu_array: np.ndarray, xi_array: np.ndarray):
-
-    s_unique = np.unique(s_array)
-    xi_perpendicular = np.zeros(len(s_unique)) # 0 < mu < 0.5
-    xi_parallel = np.zeros(len(s_unique)) # 0.5 < mu < 1
-
-    for i, s in enumerate(s_unique):
-            
-        delta_mu = np.float64(0.01)
-
-        mask = (s_array == s) & (mu_array >= 0)
-        mu_vals = mu_array[mask]
-        xi_vals = xi_array[mask]
-
-        mask_perp = (mu_vals >= 0.0) & (mu_vals < 0.5)
-        mask_par  = (mu_vals >= 0.5) & (mu_vals <= 1.0)
-
-        xi_perpendicular[i] = np.sum(xi_vals[mask_perp]) * delta_mu * 2 # 1/0.5 = 2
-        xi_parallel[i] = np.sum(xi_vals[mask_par]) * delta_mu * 2 # 1/0.5 = 2
-    
-    return xi_perpendicular, xi_parallel
-
-xi_perpendicular_measured, xi_parallel_measured = clusteringWedges(sMean_array_measured, muMean_array_measured, xiMean_array_measured)
-xi_perpendicular_correct, xi_parallel_correct = clusteringWedges(sMean_array_correct, muMean_array_correct, xiMean_array_correct)
-
-ratio_perpendicular = xi_perpendicular_measured / xi_perpendicular_correct
-ratio_parallel = xi_parallel_measured / xi_parallel_correct
+nWedges = 2
+print(f"\n===== Calculating {nWedges} clustering wedges =====")
 
 s_unique = np.unique(sMean_array_correct)
 
-plt.figure(figsize=(6,6), num="Perpendicular")
-plt.plot(s_unique, (s_unique**2) * xi_perpendicular_measured, label=r'$\xi_\perp^\mathrm{measured}(s)$', linestyle='--', linewidth=0.6, marker='o', markersize=2, color='blue')
-plt.plot(s_unique, (s_unique**2) * xi_perpendicular_correct, label=r'$\xi_\perp^\mathrm{correct}(s)$', linestyle='--', linewidth=0.6, marker='s', markersize=2, color='green')
+# we need to comute clustering wedges but we dont do wedge(mean) we do mean(wedges) to have an accurate estimate of the wedges
+wedges_measured_all = []
+for i in range(nFiles):
+    wedges_i = wdg.compute_clusteringWedges(
+        nWedges,
+        s_matrix_measured[i],
+        mu_matrix_measured[i],
+        xi_matrix_measured[i]
+    )
+    wedges_measured_all.append(wedges_i)
+wedges_measured_all = np.array(wedges_measured_all) # shape = (1000, nWedges, n_s_unique)
 
-plt.xlabel(r'$s \,(h^{-1} \, \mathrm{Mpc})$')
-plt.ylabel(r'$s^2 \xi_\perp$')
-plt.title('Perpendicular wedge')
-plt.legend()
-plt.grid(True, alpha=0.3)
-plt.savefig("graphs/z1/clustWedge_perp.pdf", dpi=600)
+wedgesMean_measured = wedges_measured_all.mean(axis=0)
+wedgesStd_measured = wedges_measured_all.std(axis=0)
+
+wedges_correct_all = []
+for i in range(nFiles):
+    wedges_i = wdg.compute_clusteringWedges(
+        nWedges,
+        s_matrix_correct[i],
+        mu_matrix_correct[i],
+        xi_matrix_correct[i]
+    )
+    wedges_correct_all.append(wedges_i)
+wedges_correct_all = np.array(wedges_correct_all) # shape = (1000, nWedges, n_s_unique)
+
+wedgesMean_correct = wedges_correct_all.mean(axis=0)
+wedgesStd_correct = wedges_correct_all.std(axis=0)
+
+wdg.plot_clusteringWedges_measVScorr(n_wedges= nWedges,
+                                     s_unique= s_unique,
+                                     wedges_measured= wedgesMean_measured,
+                                     wedges_correct= wedgesMean_correct,
+                                     err_wedges_measured= wedgesStd_measured,
+                                     err_wedges_correct= wedgesStd_correct,
+                                     base_path= "graphs/z1")
+
+ratio, errRatio = wdg.plot_clusteringWedges_ratio(n_wedges= nWedges,
+                                                  s_unique= s_unique,
+                                                  wedges_measured= wedgesMean_measured,
+                                                  wedges_correct= wedgesMean_correct,
+                                                  err_wedges_measured= wedgesStd_measured,
+                                                  err_wedges_correct= wedgesStd_correct,
+                                                  base_path= "graphs/z1",
+                                                  ylim=(0,2))
+
+s_peak_array_measured, xi_peak_array_measured, s_low_measured, s_high_measured = wdg.compute_BAO_peaks(n_wedges= nWedges, # type: ignore
+                                                                                                       s_unique= s_unique,
+                                                                                                       wedges= wedgesMean_measured,
+                                                                                                       err_wedges= wedgesStd_measured,
+                                                                                                       s_min= 85,
+                                                                                                       s_max= 115)
+
+print("Printing measured BAO peak...")
+wdg.print_BAO_intervals(n_wedges= nWedges,
+                        s_peak= s_peak_array_measured,
+                        xi_peak= xi_peak_array_measured,
+                        s_low= s_low_measured,
+                        s_high= s_high_measured)
+
+s_peak_array_correct, xi_peak_array_correct, s_low_correct, s_high_correct = wdg.compute_BAO_peaks(n_wedges= nWedges, # type: ignore
+                                                                                                   s_unique= s_unique,
+                                                                                                   wedges= wedgesMean_correct,
+                                                                                                   err_wedges= wedgesStd_correct,
+                                                                                                   s_min= 85,
+                                                                                                   s_max= 115)
+
+print("Printing correct BAO peak...")
+wdg.print_BAO_intervals(n_wedges= nWedges,
+                        s_peak= s_peak_array_correct,
+                        xi_peak= xi_peak_array_correct,
+                        s_low= s_low_correct,
+                        s_high= s_high_correct)
+
+# we integrate xi(mu, s) from mu=0 to mu=mu_max
+# in order to find the mu_max corresponding to the beginning of the scale dependance in s
+wdg.compute_muMax(sMean_array_measured, muMean_array_measured, xiMean_array_measured, 0.7, "graphs/z1")
 
 
-plt.figure(figsize=(6,6), num="Parallel")
-plt.plot(s_unique, (s_unique**2) * xi_parallel_measured, label=r'$\xi_\parallel^\mathrm{measured}(s)$', linestyle='--', linewidth=0.6, marker='o', markersize=2, color='orange')
-plt.plot(s_unique, (s_unique**2) * xi_parallel_correct, label=r'$\xi_\parallel^\mathrm{correct}(s)$', linestyle='--', linewidth=0.6, marker='s', markersize=2, color='red')
+# multipoles projection -----------------------------------------------------------------------------------------------------------
+# same thing for the multipoles
+lValues = np.array([0])
 
-plt.xlabel(r'$s \,(h^{-1} \, \mathrm{Mpc})$')
-plt.ylabel(r'$s^2 \xi_\parallel$')
-plt.title('Parallel wedge')
-plt.legend()
-plt.grid(True, alpha=0.3)
-plt.savefig("graphs/z1/clustWedge_paral.pdf", dpi=600)
+multipoles_measured_all = []
+for i in range(nFiles):
+    multipoles_i = mp.compute_multipoles(
+        lValues,
+        s_matrix_measured[i],
+        mu_matrix_measured[i],
+        xi_matrix_measured[i]
+    )
+    multipoles_measured_all.append(multipoles_i)
+multipoles_measured_all = np.array(multipoles_measured_all) # shape = (1000, n_s_unique, n_l_values)
 
+multipolesMean_measured = multipoles_measured_all.mean(axis=0)
+multipolesStd_measured = multipoles_measured_all.std(axis=0)
 
-plt.figure(figsize=(8,8), num="Perpendicular vs Parallel")
-plt.plot(s_unique, (s_unique**2) * xi_perpendicular_measured, label=r'$\xi_\perp^\mathrm{measured}(s)$', linestyle='--', linewidth=0.6, marker='o', markersize=2, color='blue')
-plt.plot(s_unique, (s_unique**2) * xi_parallel_measured, label=r'$\xi_\parallel^\mathrm{measured}(s)$', linestyle='--', linewidth=0.6, marker='s', markersize=2, color='orange')
-plt.plot(s_unique, (s_unique**2) * xi_perpendicular_correct, label=r'$\xi_\perp^\mathrm{correct}(s)$', linestyle='--', linewidth=0.6, marker='p', markersize=2, color='green')
-plt.plot(s_unique, (s_unique**2) * xi_parallel_correct, label=r'$\xi_\parallel^\mathrm{correct}(s)$', linestyle='--', linewidth=0.6, marker='H', markersize=2, color='red')
+multipoles_correct_all = []
+for i in range(nFiles):
+    multipoles_i = mp.compute_multipoles(
+        lValues,
+        s_matrix_correct[i],
+        mu_matrix_correct[i],
+        xi_matrix_correct[i]
+    )
+    multipoles_correct_all.append(multipoles_i)
+multipoles_correct_all = np.array(multipoles_correct_all) # shape = (1000, n_s_unique, n_l_values)
 
-plt.xlabel(r'$s \,(h^{-1} \, \mathrm{Mpc})$')
-plt.ylabel(r'$s^2 \xi$')
-plt.title('Clustering Wedges')
-plt.legend()
-plt.grid(True, alpha=0.3)
-plt.savefig("graphs/z1/clustWedge_perpVSparal.pdf", dpi=600)
+multipolesMean_correct  = multipoles_correct_all.mean(axis=0)
+multipolesStd_correct  = multipoles_correct_all.std(axis=0)
 
+nPoints = 5
+print("\n===== Calculating monopoles =====")
+print(f"First {nPoints} measured points:")
+mp.print_multipoles(l_values= lValues,
+                    s_array= sMean_array_measured,
+                    xi_multipoles= multipolesMean_measured,
+                    n_values= nPoints)
 
-plt.figure(figsize=(8,8), num="Ratio measured vs correct")
-plt.plot(s_unique, ratio_perpendicular, label=r'$\frac{\xi_\perp^\mathrm{measured}}{\xi_\perp^\mathrm{correct}}$', linestyle='--', linewidth=0.6, marker='*', markersize=2, color='cyan')
-plt.plot(s_unique, ratio_parallel, label=r'$\frac{\xi_\parallel^\mathrm{measured}}{\xi_\parallel^\mathrm{correct}}$', linestyle='--', linewidth=0.6, marker='*', markersize=2, color='magenta')
+print(f"\nFirst {nPoints} correct points:")
+mp.print_multipoles(l_values= lValues,
+                    s_array= sMean_array_correct,
+                    xi_multipoles= multipolesMean_correct,
+                    n_values= nPoints)
 
-plt.xlabel(r'$s \,(h^{-1} \, \mathrm{Mpc})$')
-plt.ylabel(r'$\frac{\xi^\mathrm{measured}}{\xi^\mathrm{correct}}$')
-plt.title('Clustering Wedges Ratio')
-plt.legend()
-plt.grid(True, alpha=0.3)
-plt.ylim(0,2)
-plt.savefig("graphs/z1/clustWedge_ratio.pdf", dpi=600)
+mp.plot_multipole_measVScorr(l_value= lValues[0],
+                             s_unique= s_unique,
+                             multipole_measured= multipolesMean_measured[:,0],
+                             multipole_correct= multipolesMean_correct[:,0],
+                             err_multipole_measured=multipolesStd_measured[:,0],
+                             err_multipole_correct=multipolesStd_correct[:,0],
+                             base_path= "graphs/z1")
+
+multipoleMean_ratio, multipoleStd_ratio = mp.plot_multipole_ratio(l_value= lValues[0],
+                                                                  s_unique= s_unique,
+                                                                  multipole_measured= multipolesMean_measured[:,0],
+                                                                  multipole_correct= multipolesMean_correct[:,0] ,
+                                                                  err_multipole_measured= multipolesStd_measured[:,0],
+                                                                  err_multipole_correct= multipolesStd_correct[:,0],
+                                                                  base_path= "graphs/z1",
+                                                                  ylim=(-2,2))
 
 plt.show()
