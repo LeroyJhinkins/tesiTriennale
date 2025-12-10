@@ -21,7 +21,6 @@ def plot_contourf(coords: str,
                   z_array: npt.NDArray[np.float64],
                   base_path: str,
                   kind: str,
-                  isMeanRpPI: bool = False,
                   xlim: Optional[Tuple[float, float]] = None,
                   ylim: Optional[Tuple[float, float]] = None,
                   lvls: int = 20,
@@ -52,10 +51,6 @@ def plot_contourf(coords: str,
     kind : str
         Type of correlation map to plot. Must be either `"measured"` or
         `"correct"`. Used for labeling the plot.
-    isMeanRpPI : bool, optional
-        If `True` and `coords="RpPI"`, indicates that the input array is an
-        averaged map where the original data had (π, rₚ) ordering. In this
-        case the reshaped grid is transposed to match the correct order of given data.
     xlim : tuple of float, optional
         Limits for the x-axis of the plot.
     ylim : tuple of float, optional
@@ -72,7 +67,7 @@ def plot_contourf(coords: str,
         - `X` and `Y` are the meshgrid arrays built from the unique values
           of the x and y coordinates.
         - `Z` is the reshaped correlation map corresponding to `(X, Y)`,
-          transposed when required by `isMeanRpPI`.
+          transposed when `coords == "RpPI"`.
     """
 
     # check for coords to be either "SMU" or "RpPI"
@@ -81,11 +76,30 @@ def plot_contourf(coords: str,
         SR = r'(\mu, s)'
         x_label = r'$\mu$'
         y_label = r'$s \,[h^{-1} \, \mathrm{Mpc}]$'
+        
+        # in this case: s is SLOW (Y-axis), mu is FAST (X-axis)
+        # Native shape (N_s, N_mu) == Plotting shape (N_y, N_x)  =>  no transpose needed
+        # N.B.: y_unique corresponds to the SLOW index 's', x_unique to the FAST index 'mu'
+        x_unique = np.unique(x_array) # N_mu
+        y_unique = np.unique(y_array) # N_s
+        Z = z_array.reshape((len(y_unique), len(x_unique)))
 
     elif coords == "RpPI":
         SR = r'(r_\mathrm{p}, \pi)'
         x_label = r'$r_\mathrm{p} \,[h^{-1} \, \mathrm{Mpc}]$'
         y_label = r'$\pi \,[h^{-1} \, \mathrm{Mpc}]$'
+        
+        # in this case: r_p is SLOW, pi is FAST
+        # Native shape (N_rp, N_pi) != Plotting shape (N_pi, N_rp)  =>  tranposition is required
+        # N.B.: x_unique corresponds to the SLOW index 'r_p', y_unique to the FAST index 'pi'
+        x_unique = np.unique(x_array) # N_rp
+        y_unique = np.unique(y_array) # N_pi
+        
+        # reshape to native structure (r_p-rows, pi-columns)
+        Z_native = z_array.reshape((len(x_unique), len(y_unique)))
+        
+        # transpose to plot structure (pi-rows, r_p-columns)
+        Z = Z_native.T
 
     else:
         raise ValueError(f"coords must be one of {valid_coords}, got '{coords}'")
@@ -95,17 +109,7 @@ def plot_contourf(coords: str,
     if kind not in valid_kinds:
         raise ValueError(f"kind must be one of {valid_kinds}, got '{kind}'")
 
-    x_unique = np.unique(x_array)
-    y_unique = np.unique(y_array)
-    
     X, Y = np.meshgrid(x_unique, y_unique)
-    Z = z_array.reshape((len(y_unique), len(x_unique)))
-
-    # if isMeanRpPI = True, it means that we are trying to plot the contourf of the mean over the files in (r_p, pi)
-    # but in the files the first column is pi and the second is r_p
-    # so when we reshape we actually have to transpose as well to have the correct plot
-    if isMeanRpPI and coords == "RpPI":
-        Z = Z.T
 
     plt.figure(figsize=(9,8), num=f"2D map {coords} {kind}")
     contour = plt.contourf(X, Y, Z, levels=lvls, cmap='turbo')
@@ -146,7 +150,6 @@ def plot_contourf_ratio(coords: str,
                         z_array_measured: npt.NDArray[np.float64],
                         z_array_correct: npt.NDArray[np.float64],
                         base_path: str,
-                        isMeanRpPI: bool = False,
                         xlim: Optional[Tuple[float, float]] = None,
                         ylim: Optional[Tuple[float, float]] = None,
                         lvls: int = 20,
@@ -178,10 +181,6 @@ def plot_contourf_ratio(coords: str,
         ratio with `z_array_measured`.
     base_path : str
         Path to the directory in which the output figure will be saved.
-    isMeanRpPI : bool, optional
-        If `True` and `coords="RpPI"`, indicates that the input arrays are
-        averaged maps where the original data had (π, rₚ) ordering. In this
-        case the reshaped grid is transposed to match the correct order of given data.
     xlim : tuple of float, optional
         Limits for the x-axis of the plot.
     ylim : tuple of float, optional
@@ -196,24 +195,9 @@ def plot_contourf_ratio(coords: str,
     np.ndarray
         Array of the element-wise ratio `z_array_measured / z_array_correct`,
         with the same shape as the reshaped input arrays and transposed when
-        required by `isMeanRpPI`.
+        `coords == "RpPI"`.
     """
     
-    # check for coords to be either "SMU" or "RpPI"
-    valid_coords = ["SMU", "RpPI"]
-    if coords == "SMU":
-        SR = r'(\mu, s)'
-        x_label = r'$\mu$'
-        y_label = r'$s \,[h^{-1} \, \mathrm{Mpc}]$'
-
-    elif coords == "RpPI":
-        SR = r'(r_\mathrm{p}, \pi)'
-        x_label = r'$r_\mathrm{p} \,[h^{-1} \, \mathrm{Mpc}]$'
-        y_label = r'$\pi \,[h^{-1} \, \mathrm{Mpc}]$'
-
-    else:
-        raise ValueError(f"coords must be one of {valid_coords}, got '{coords}'")
-
     x_unique = np.unique(x_array)
     y_unique = np.unique(y_array)
     z_array_ratio = np.divide(
@@ -222,9 +206,37 @@ def plot_contourf_ratio(coords: str,
         out=np.full_like(z_array_measured, np.nan),
         where=(z_array_correct != 0)
     )
-    
+
+    # check for coords to be either "SMU" or "RpPI"
+    valid_coords = ["SMU", "RpPI"]
+    if coords == "SMU":
+        SR = r'(\mu, s)'
+        x_label = r'$\mu$'
+        y_label = r'$s \,[h^{-1} \, \mathrm{Mpc}]$'
+        
+        # in this case: s is SLOW (Y-axis), mu is FAST (X-axis).
+        # Native shape (N_s, N_mu) == Plotting shape (N_y, N_x)  =>  no transpose needed
+        # Reshape directly to (N_y, N_x)
+        Z = z_array_ratio.reshape((len(y_unique), len(x_unique)))
+
+    elif coords == "RpPI":
+        SR = r'(r_\mathrm{p}, \pi)'
+        x_label = r'$r_\mathrm{p} \,[h^{-1} \, \mathrm{Mpc}]$'
+        y_label = r'$\pi \,[h^{-1} \, \mathrm{Mpc}]$'
+        
+        # in this case: r_p is SLOW, pi is FAST.
+        # Native shape (N_rp, N_pi) != Plotting shape (N_pi, N_rp)  =>  tranposition is required
+        
+        # reshape to native structure (r_p-rows, pi-columns)
+        Z_native = z_array_ratio.reshape((len(x_unique), len(y_unique)))
+        
+        # transpose to plot structure (pi-rows, r_p-columns)
+        Z = Z_native.T
+
+    else:
+        raise ValueError(f"coords must be one of {valid_coords}, got '{coords}'")
+
     X, Y = np.meshgrid(x_unique, y_unique)
-    Z = z_array_ratio.reshape((len(y_unique), len(x_unique)))
 
     # discard all values outside (z_min, z_max)
     if z_min is not None:
@@ -234,12 +246,6 @@ def plot_contourf_ratio(coords: str,
     if z_max is not None:
         mask = np.abs(Z) > z_max
         Z[mask] = np.nan
-
-    # if isMeanRpPI = True, it means that we are trying to plot the contourf of the mean over the files in (r_p, pi)
-    # but in the files the first column is pi and the second is r_p
-    # so when we reshape we actually have to transpose as well to have the correct plot
-    if isMeanRpPI and coords == "RpPI":
-        Z = Z.T
 
     plt.figure(figsize=(9,8), num=f"2D map {coords} ratio")
     contour = plt.contourf(X, Y, Z, levels=lvls, cmap='RdBu_r', vmin=v_min, vmax=v_max)
@@ -280,11 +286,11 @@ def plot_imshow(coords: str,
                 z_array: npt.NDArray[np.float64],
                 base_path: str,
                 kind: str,
-                isMeanRpPI: bool = False,
                 xlim: Optional[Tuple[float, float]] = None,
                 ylim: Optional[Tuple[float, float]] = None,
                 v_min: Optional[float] = None,
-                v_max: Optional[float] = None
+                v_max: Optional[float] = None,
+                interp: str = "nearest"
 ) -> Tuple[
     npt.NDArray[np.float64],
     npt.NDArray[np.float64],
@@ -312,10 +318,6 @@ def plot_imshow(coords: str,
     kind : str
         Type of correlation map to plot. Must be either `"measured"` or
         `"correct"`. Used for labeling the plot.
-    isMeanRpPI : bool, optional
-        If `True` and `coords="RpPI"`, indicates that the input array is an
-        averaged map where the original data had (π, rₚ) ordering. In this
-        case the reshaped grid is transposed to match the correct order of given data.
     xlim : tuple of float, optional
         Limits for the x-axis of the plot.
     ylim : tuple of float, optional
@@ -325,6 +327,9 @@ def plot_imshow(coords: str,
         from imshow plot.
     v_max : float, optional
         Maximum value for the color scale.
+    interp : str, optional
+        Interpolation formula used in imshow. Default is `"nearest"`.
+        Typical formulae: "nearest" (no smoothing), "bilinear" (smooth gradient), "bicubic" (even smoother).
 
     Returns
     -------
@@ -333,7 +338,7 @@ def plot_imshow(coords: str,
         - `X` and `Y` are the meshgrid arrays built from the unique values
           of the x and y coordinates.
         - `Z` is the reshaped correlation map corresponding to `(X, Y)`,
-          transposed when required by `isMeanRpPI`.
+          transposed when `coords == "RpPI"`.
     """
 
     # check for coords to be either "SMU" or "RpPI"
@@ -342,11 +347,30 @@ def plot_imshow(coords: str,
         SR = r'(\mu, s)'
         x_label = r'$\mu$'
         y_label = r'$s \,[h^{-1} \, \mathrm{Mpc}]$'
+        
+        # in this case: s is SLOW (Y-axis), mu is FAST (X-axis)
+        # Native shape (N_s, N_mu) == Plotting shape (N_y, N_x)  =>  no transpose needed
+        # N.B.: y_unique corresponds to the SLOW index 's', x_unique to the FAST index 'mu'
+        x_unique = np.unique(x_array) # N_mu
+        y_unique = np.unique(y_array) # N_s
+        Z = z_array.reshape((len(y_unique), len(x_unique)))
 
     elif coords == "RpPI":
         SR = r'(r_\mathrm{p}, \pi)'
         x_label = r'$r_\mathrm{p} \,[h^{-1} \, \mathrm{Mpc}]$'
         y_label = r'$\pi \,[h^{-1} \, \mathrm{Mpc}]$'
+        
+        # in this case: r_p is SLOW, pi is FAST
+        # Native shape (N_rp, N_pi) != Plotting shape (N_pi, N_rp)  =>  tranposition is required
+        # N.B.: x_unique corresponds to the SLOW index 'r_p', y_unique to the FAST index 'pi'
+        x_unique = np.unique(x_array) # N_rp
+        y_unique = np.unique(y_array) # N_pi
+        
+        # reshape to native structure (r_p-rows, pi-columns)
+        Z_native = z_array.reshape((len(x_unique), len(y_unique)))
+        
+        # transpose to plot structure (pi-rows, r_p-columns)
+        Z = Z_native.T
 
     else:
         raise ValueError(f"coords must be one of {valid_coords}, got '{coords}'")
@@ -356,17 +380,7 @@ def plot_imshow(coords: str,
     if kind not in valid_kinds:
         raise ValueError(f"kind must be one of {valid_kinds}, got '{kind}'")
 
-    x_unique = np.unique(x_array)
-    y_unique = np.unique(y_array)
-
     X, Y = np.meshgrid(x_unique, y_unique)
-    Z = z_array.reshape((len(y_unique), len(x_unique)))
-
-    # if isMeanRpPI = True, it means that we are trying to plot the contourf of the mean over the files in (r_p, pi)
-    # but in the files the first column is pi and the second is r_p
-    # so when we reshape we actually have to transpose as well to have the correct plot
-    if isMeanRpPI and coords == "RpPI":
-        Z = Z.T
 
     # this is for the imshow to have physical coordinate axes instead of pixels
     extent = [
@@ -383,7 +397,7 @@ def plot_imshow(coords: str,
                      aspect="auto",
                      vmin=v_min,
                      vmax=v_max,
-                     interpolation="nearest")
+                     interpolation=interp)
 
     cbar = plt.colorbar(img, label=fr'$\xi^\mathrm{{{kind}}}{SR}$')
 
@@ -407,13 +421,13 @@ def plot_imshow_ratio(coords: str,
                       z_array_measured: npt.NDArray[np.float64],
                       z_array_correct: npt.NDArray[np.float64],
                       base_path: str,
-                      isMeanRpPI: bool = False,
                       xlim: Optional[Tuple[float, float]] = None,
                       ylim: Optional[Tuple[float, float]] = None,
                       v_min: Optional[float] = None,
                       v_max: Optional[float] = None,
                       z_min: Optional[float] = None,
-                      z_max: Optional[float] = None
+                      z_max: Optional[float] = None,
+                      interp: str = "nearest"
 ) -> npt.NDArray[np.float64]:
     """
     Generate an image plot (imshow) of the ratio between measured and
@@ -441,10 +455,6 @@ def plot_imshow_ratio(coords: str,
     kind : str
         Type of correlation map to plot. Must be either `"measured"` or
         `"correct"`. Used for labeling the plot.
-    isMeanRpPI : bool, optional
-        If `True` and `coords="RpPI"`, indicates that the input arrays are
-        averaged maps where the original data had (π, rₚ) ordering. In this
-        case the reshaped grid is transposed to match the correct geometry.
     xlim : tuple of float, optional
         Limits for the x-axis of the plot.
     ylim : tuple of float, optional
@@ -459,29 +469,17 @@ def plot_imshow_ratio(coords: str,
     z_max : float, optional
         Values with absolute magnitude above this threshold are masked
         (set to NaN) in the ratio map.
+    interp : str, optional
+        Interpolation formula used in imshow. Default is `"nearest"`.
+        Typical formulae: "nearest" (no smoothing), "bilinear" (smooth gradient), "bicubic" (even smoother).
 
     Returns
     -------
     np.ndarray
         Array of the element-wise ratio `z_array_measured / z_array_correct`,
         with the same shape as the reshaped input arrays and transposed when
-        required by `isMeanRpPI`.
+        `coords == "RpPI"`.
     """
-
-    # check for coords to be either "SMU" or "RpPI"
-    valid_coords = ["SMU", "RpPI"]
-    if coords == "SMU":
-        SR = r'(\mu, s)'
-        x_label = r'$\mu$'
-        y_label = r'$s \,[h^{-1} \, \mathrm{Mpc}]$'
-
-    elif coords == "RpPI":
-        SR = r'(r_\mathrm{p}, \pi)'
-        x_label = r'$r_\mathrm{p} \,[h^{-1} \, \mathrm{Mpc}]$'
-        y_label = r'$\pi \,[h^{-1} \, \mathrm{Mpc}]$'
-
-    else:
-        raise ValueError(f"coords must be one of {valid_coords}, got '{coords}'")
 
     x_unique = np.unique(x_array)
     y_unique = np.unique(y_array)
@@ -491,8 +489,35 @@ def plot_imshow_ratio(coords: str,
         out=np.full_like(z_array_measured, np.nan),
         where=(z_array_correct != 0)
     )
-    
-    Z = z_array_ratio.reshape((len(y_unique), len(x_unique)))
+
+    # check for coords to be either "SMU" or "RpPI"
+    valid_coords = ["SMU", "RpPI"]
+    if coords == "SMU":
+        SR = r'(\mu, s)'
+        x_label = r'$\mu$'
+        y_label = r'$s \,[h^{-1} \, \mathrm{Mpc}]$'
+        
+        # in this case: s is SLOW (Y-axis), mu is FAST (X-axis).
+        # Native shape (N_s, N_mu) == Plotting shape (N_y, N_x)  =>  no transpose needed
+        # Reshape directly to (N_y, N_x)
+        Z = z_array_ratio.reshape((len(y_unique), len(x_unique)))
+
+    elif coords == "RpPI":
+        SR = r'(r_\mathrm{p}, \pi)'
+        x_label = r'$r_\mathrm{p} \,[h^{-1} \, \mathrm{Mpc}]$'
+        y_label = r'$\pi \,[h^{-1} \, \mathrm{Mpc}]$'
+        
+        # in this case: r_p is SLOW, pi is FAST.
+        # Native shape (N_rp, N_pi) != Plotting shape (N_pi, N_rp)  =>  tranposition is required
+        
+        # reshape to native structure (r_p-rows, pi-columns)
+        Z_native = z_array_ratio.reshape((len(x_unique), len(y_unique)))
+        
+        # transpose to plot structure (pi-rows, r_p-columns)
+        Z = Z_native.T
+
+    else:
+        raise ValueError(f"coords must be one of {valid_coords}, got '{coords}'")
 
     # discard all values outside (z_min, z_max)
     if z_min is not None:
@@ -503,12 +528,6 @@ def plot_imshow_ratio(coords: str,
         mask = np.abs(Z) > z_max
         Z[mask] = np.nan
     
-    # if isMeanRpPI = True, it means that we are trying to plot the contourf of the mean over the files in (r_p, pi)
-    # but in the files the first column is pi and the second is r_p
-    # so when we reshape we actually have to transpose as well to have the correct plot
-    if isMeanRpPI and coords == "RpPI":
-        Z = Z.T
-
     # this is for the imshow to have physical coordinate axes instead of pixels
     extent = [
         x_unique.min(), x_unique.max(),
@@ -524,7 +543,7 @@ def plot_imshow_ratio(coords: str,
                      aspect="auto",
                      vmin=v_min,
                      vmax=v_max,
-                     interpolation="nearest")
+                     interpolation=interp)
 
     cbar = plt.colorbar(img, label=fr'$\frac{{\xi_\mathrm{{measured}}}}{{\xi_\mathrm{{correct}}}} {SR}$')
     

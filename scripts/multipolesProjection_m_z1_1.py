@@ -2,8 +2,8 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 from libs import ReadFITS as read
-from libs import Multipoles as mp
 from libs import BiMaps as bm
+from libs import Projections as prj
 plt.rcParams.update({'font.size': 14})
 plt.rcParams['text.usetex'] = True  # use real LaTeX
 plt.rcParams['text.latex.preamble'] = r'\usepackage{siunitx}'  # use siunitx
@@ -31,11 +31,11 @@ print("\nTotal number of points:", nData)
 s_unique = np.unique(s_array)
 
 l_values = np.array([0,1,2,3,4])
-xi_multipoles = mp.compute_multipoles(l_values, s_array, mu_array, xi_array)
+xi_multipoles = prj.compute_multipoles(l_values, s_array, mu_array, xi_array)
 
 nPoints = 5
 print(f"\nFirst {nPoints} points:")
-mp.print_multipoles(l_values, s_array, xi_multipoles, nPoints)
+prj.print_multipoles(l_values, s_array, xi_multipoles, nPoints)
 
 
 # comparison with official data ---------------------------------------------------------------------------------------------------
@@ -46,7 +46,7 @@ s_official, xi_official, _ = read.readFITS_multipoles(filepath_multipoles)
 print("\nTotal number of official points:", len(s_official))
     
 print(f"\nFirst {nPoints} official points (expanded in multipoles):")
-mp.print_multipoles(l_values, s_official, xi_official, nPoints)
+prj.print_multipoles(l_values, s_official, xi_official, nPoints)
 
 print("\nPrinting big differences (>10^-15) between calculations and official data: ")
 diff = np.abs(xi_multipoles - xi_official)
@@ -59,7 +59,7 @@ for i in range(len(s_unique)):
 
 
 # plot 1st monopole ---------------------------------------------------------------------------------------------------------------
-mp.plot_multipole(0, s_unique, xi_multipoles[:,0], "graphs/m_z1_1")
+prj.plot_multipole(0, s_unique, xi_multipoles[:,0], "graphs/m_z1_1")
 
 
 # 2D map --------------------------------------------------------------------------------------------------------------------------

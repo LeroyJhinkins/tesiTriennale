@@ -154,7 +154,7 @@ def readFITS_auto_series_SMU(base_path: str,
 
         with fits.open(filepath) as hdul:
 
-            table_hdu = hdul[1]  # HDU 0 is an empty header that precedes the actual table
+            table_hdu = hdul[1] # HDU 0 is an empty header that precedes the actual table
             table_data = table_hdu.data # type: ignore
                                         # comment to ignore Pylance warning
             nData = table_data.shape[0]
@@ -218,8 +218,6 @@ def readFITS_auto_series_RpPI(root_folder: str,
       sorted according to the number in `m_z1_X`.
     - Each folder is expected to contain a single `.xml` file which specifies
       the corresponding FITS filename.
-    - The function assumes the first column of the FITS table is π, the second
-      column is r_p, and the third column is ξ.
     - If a file does not match the expected number of elements or columns,
       a message is printed and that row in the matrices remains zeros.
     """
@@ -267,7 +265,7 @@ def readFITS_auto_series_RpPI(root_folder: str,
 
         with fits.open(fits_path) as hdul:
 
-            table_hdu = hdul[1]  # HDU 0 is an empty header that precedes the actual table
+            table_hdu = hdul[1] # HDU 0 is an empty header that precedes the actual table
             table_data = table_hdu.data # type: ignore
                                         # comment to ignore Pylance warning
             nData = table_data.shape[0]
@@ -277,8 +275,8 @@ def readFITS_auto_series_RpPI(root_folder: str,
 
                 names = table_data.columns.names
 
-                pi_matrix[i] = table_data[names[0]] # apparently the first column in the file is pi
-                rp_matrix[i] = table_data[names[1]] # and the second is r_p
+                rp_matrix[i] = table_data[names[0]]
+                pi_matrix[i] = table_data[names[1]]
                 xi_matrix[i] = table_data[names[2]]
             
             else:
@@ -325,13 +323,13 @@ def readFITS_pairs_series_SMU(base_path: str,
             from each file.
         - `dd_matrix` : np.ndarray
             Array of shape `(n_files, n_elements)` containing the data-data
-            pair counts from each file.
+            raw pair counts from each file.
         - `dr_matrix` : np.ndarray
             Array of shape `(n_files, n_elements)` containing the data-random
-            pair counts from each file.
+            raw pair counts from each file.
         - `rr_matrix` : np.ndarray
             Array of shape `(n_files, n_elements)` containing the random-random
-            pair counts from each file.
+            raw pair counts from each file.
 
     Notes
     -----
@@ -351,7 +349,7 @@ def readFITS_pairs_series_SMU(base_path: str,
 
         with fits.open(filepath) as hdul:
 
-            table_hdu = hdul[1]  # HDU 0 is an empty header that precedes the actual table
+            table_hdu = hdul[1] # HDU 0 is an empty header that precedes the actual table
             table_data = table_hdu.data # type: ignore
                                         # comment to ignore Pylance warning
             
@@ -375,8 +373,8 @@ def readFITS_pairs_series_SMU(base_path: str,
 
 
 def readFITS_pairs_series_RpPI(root_folder: str,
-                              n_elements: int,
-                              kind: str
+                               n_elements: int,
+                               kind: str
 ) -> Tuple[
     npt.NDArray[np.float64],
     npt.NDArray[np.float64],
@@ -426,8 +424,6 @@ def readFITS_pairs_series_RpPI(root_folder: str,
       sorted according to the number in `m_z1_X`.
     - Each folder is expected to contain a single `.xml` file which specifies
       the corresponding FITS filename.
-    - The function assumes the first column of the FITS table is π, the second
-      column is r_p, and the third column is ξ.
     - If a file does not match the expected number of elements or columns,
       a message is printed and that row in the matrices remains zeros.
     """
@@ -477,7 +473,7 @@ def readFITS_pairs_series_RpPI(root_folder: str,
 
         with fits.open(fits_path) as hdul:
 
-            table_hdu = hdul[1]  # HDU 0 is an empty header that precedes the actual table
+            table_hdu = hdul[1] # HDU 0 is an empty header that precedes the actual table
             table_data = table_hdu.data # type: ignore
                                         # comment to ignore Pylance warning
             nData = table_data.shape[0]
@@ -487,8 +483,8 @@ def readFITS_pairs_series_RpPI(root_folder: str,
 
                 names = table_data.columns.names
 
-                pi_matrix[i] = table_data[names[0]] # apparently the first column in the file is pi
-                rp_matrix[i] = table_data[names[1]] # and the second is r_p
+                rp_matrix[i] = table_data[names[0]]
+                pi_matrix[i] = table_data[names[1]]
                 dd_matrix[i] = table_data[names[2]]
                 dr_matrix[i] = table_data[names[3]]
                 rr_matrix[i] = table_data[names[4]]

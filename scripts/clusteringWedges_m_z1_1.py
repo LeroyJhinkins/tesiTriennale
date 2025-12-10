@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 from libs import ReadFITS as read
-from libs import ClusteringWedges as wdg
+from libs import Projections as prj
 plt.rcParams.update({'font.size': 14})
 plt.rcParams['text.usetex'] = True  # use real LaTeX
 plt.rcParams['text.latex.preamble'] = r'\usepackage{siunitx}'  # use siunitx
@@ -32,11 +32,11 @@ print(f"Calculating {nWedges} clustering wedges...")
 
 s_unique = np.unique(s_array_correct)
 
-wedges_measured = wdg.compute_clusteringWedges(nWedges, s_array_measured, mu_array_measured, xi_array_measured)
-wedges_correct = wdg.compute_clusteringWedges(nWedges, s_array_correct, mu_array_correct, xi_array_correct)
+wedges_measured = prj.compute_clusteringWedges(nWedges, s_array_measured, mu_array_measured, xi_array_measured)
+wedges_correct = prj.compute_clusteringWedges(nWedges, s_array_correct, mu_array_correct, xi_array_correct)
 
-wdg.plot_clusteringWedges_measVScorr(nWedges, s_unique, wedges_measured, wedges_correct, base_path="graphs/m_z1_1")
+prj.plot_clusteringWedges_measVScorr(nWedges, s_unique, wedges_measured, wedges_correct, base_path="graphs/m_z1_1")
 
-ratio = wdg.plot_clusteringWedges_ratio(nWedges, s_unique, wedges_measured, wedges_correct, base_path="graphs/m_z1_1")
+ratio = prj.plot_clusteringWedges_ratio(nWedges, s_unique, wedges_measured, wedges_correct, base_path="graphs/m_z1_1")
 
 plt.show()

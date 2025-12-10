@@ -2,9 +2,8 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 from libs import ReadFITS as read
-from libs import ClusteringWedges as wdg
-from libs import Multipoles as mp
 from libs import BiMaps as bm
+from libs import Projections as prj
 plt.rcParams.update({'font.size': 14})
 plt.rcParams['text.usetex'] = True  # use real LaTeX
 plt.rcParams['text.latex.preamble'] = r'\usepackage{siunitx}'  # use siunitx
@@ -134,10 +133,10 @@ print(f"\n===== Calculating {nWedges} clustering wedges =====")
 
 s_unique = np.unique(sMean_array_correct)
 
-# we need to comute clustering wedges but we dont do wedge(mean) we do mean(wedges) to have an accurate estimate of the wedges
+# we need to compute clustering wedges but we dont do wedge(mean) we do mean(wedges) to have an accurate estimate of the wedges
 wedges_measured_all = []
 for i in range(nFiles):
-    wedges_i = wdg.compute_clusteringWedges(
+    wedges_i = prj.compute_clusteringWedges(
         nWedges,
         s_matrix_measured[i],
         mu_matrix_measured[i],
@@ -151,7 +150,7 @@ wedgesStd_measured = wedges_measured_all.std(axis=0)
 
 wedges_correct_all = []
 for i in range(nFiles):
-    wedges_i = wdg.compute_clusteringWedges(
+    wedges_i = prj.compute_clusteringWedges(
         nWedges,
         s_matrix_correct[i],
         mu_matrix_correct[i],
@@ -163,7 +162,7 @@ wedges_correct_all = np.array(wedges_correct_all) # shape = (1000, nWedges, n_s_
 wedgesMean_correct = wedges_correct_all.mean(axis=0)
 wedgesStd_correct = wedges_correct_all.std(axis=0)
 
-wdg.plot_clusteringWedges_measVScorr(n_wedges= nWedges,
+prj.plot_clusteringWedges_measVScorr(n_wedges= nWedges,
                                      s_unique= s_unique,
                                      wedges_measured= wedgesMean_measured,
                                      wedges_correct= wedgesMean_correct,
@@ -171,7 +170,7 @@ wdg.plot_clusteringWedges_measVScorr(n_wedges= nWedges,
                                      err_wedges_correct= wedgesStd_correct,
                                      base_path= "graphs/z1")
 
-ratio, errRatio = wdg.plot_clusteringWedges_ratio(n_wedges= nWedges,
+ratio, errRatio = prj.plot_clusteringWedges_ratio(n_wedges= nWedges,
                                                   s_unique= s_unique,
                                                   wedges_measured= wedgesMean_measured,
                                                   wedges_correct= wedgesMean_correct,
@@ -180,37 +179,37 @@ ratio, errRatio = wdg.plot_clusteringWedges_ratio(n_wedges= nWedges,
                                                   base_path= "graphs/z1",
                                                   ylim=(0,2))
 
-s_peak_array_measured, xi_peak_array_measured, s_low_measured, s_high_measured = wdg.compute_BAO_peaks(n_wedges= nWedges, # type: ignore
-                                                                                                       s_unique= s_unique,
-                                                                                                       wedges= wedgesMean_measured,
-                                                                                                       err_wedges= wedgesStd_measured,
-                                                                                                       s_min= 85,
-                                                                                                       s_max= 115)
+s_peak_array_measured, xi_peak_array_measured, s_low_measured, s_high_measured = prj.compute_clusteringWedges_BAOpeaks(n_wedges= nWedges, # type: ignore
+                                                                                                                       s_unique= s_unique,
+                                                                                                                       wedges= wedgesMean_measured,
+                                                                                                                       err_wedges= wedgesStd_measured,
+                                                                                                                       s_min= 85,
+                                                                                                                       s_max= 115)
 
 print("Printing measured BAO peak...")
-wdg.print_BAO_intervals(n_wedges= nWedges,
-                        s_peak= s_peak_array_measured,
-                        xi_peak= xi_peak_array_measured,
-                        s_low= s_low_measured,
-                        s_high= s_high_measured)
+prj.print_clusteringWedges_BAOintervals(n_wedges= nWedges,
+                                        s_peak= s_peak_array_measured,
+                                        xi_peak= xi_peak_array_measured,
+                                        s_low= s_low_measured,
+                                        s_high= s_high_measured)
 
-s_peak_array_correct, xi_peak_array_correct, s_low_correct, s_high_correct = wdg.compute_BAO_peaks(n_wedges= nWedges, # type: ignore
-                                                                                                   s_unique= s_unique,
-                                                                                                   wedges= wedgesMean_correct,
-                                                                                                   err_wedges= wedgesStd_correct,
-                                                                                                   s_min= 85,
-                                                                                                   s_max= 115)
+s_peak_array_correct, xi_peak_array_correct, s_low_correct, s_high_correct = prj.compute_clusteringWedges_BAOpeaks(n_wedges= nWedges, # type: ignore
+                                                                                                                   s_unique= s_unique,
+                                                                                                                   wedges= wedgesMean_correct,
+                                                                                                                   err_wedges= wedgesStd_correct,
+                                                                                                                   s_min= 85,
+                                                                                                                   s_max= 115)
 
 print("Printing correct BAO peak...")
-wdg.print_BAO_intervals(n_wedges= nWedges,
-                        s_peak= s_peak_array_correct,
-                        xi_peak= xi_peak_array_correct,
-                        s_low= s_low_correct,
-                        s_high= s_high_correct)
+prj.print_clusteringWedges_BAOintervals(n_wedges= nWedges,
+                                        s_peak= s_peak_array_correct,
+                                        xi_peak= xi_peak_array_correct,
+                                        s_low= s_low_correct,
+                                        s_high= s_high_correct)
 
 # we integrate xi(mu, s) from mu=0 to mu=mu_max
 # in order to find the mu_max corresponding to the beginning of the scale dependance in s
-wdg.compute_muMax(sMean_array_measured, muMean_array_measured, xiMean_array_measured, 0.7, "graphs/z1")
+prj.compute_muMax(sMean_array_measured, muMean_array_measured, xiMean_array_measured, 0.7, "graphs/z1")
 
 
 # multipoles projection -----------------------------------------------------------------------------------------------------------
@@ -219,7 +218,7 @@ lValues = np.array([0])
 
 multipoles_measured_all = []
 for i in range(nFiles):
-    multipoles_i = mp.compute_multipoles(
+    multipoles_i = prj.compute_multipoles(
         lValues,
         s_matrix_measured[i],
         mu_matrix_measured[i],
@@ -233,7 +232,7 @@ multipolesStd_measured = multipoles_measured_all.std(axis=0)
 
 multipoles_correct_all = []
 for i in range(nFiles):
-    multipoles_i = mp.compute_multipoles(
+    multipoles_i = prj.compute_multipoles(
         lValues,
         s_matrix_correct[i],
         mu_matrix_correct[i],
@@ -248,18 +247,18 @@ multipolesStd_correct  = multipoles_correct_all.std(axis=0)
 nPoints = 5
 print("\n===== Calculating monopoles =====")
 print(f"First {nPoints} measured points:")
-mp.print_multipoles(l_values= lValues,
+prj.print_multipoles(l_values= lValues,
                     s_array= sMean_array_measured,
                     xi_multipoles= multipolesMean_measured,
                     n_values= nPoints)
 
 print(f"\nFirst {nPoints} correct points:")
-mp.print_multipoles(l_values= lValues,
+prj.print_multipoles(l_values= lValues,
                     s_array= sMean_array_correct,
                     xi_multipoles= multipolesMean_correct,
                     n_values= nPoints)
 
-mp.plot_multipole_measVScorr(l_value= lValues[0],
+prj.plot_multipole_measVScorr(l_value= lValues[0],
                              s_unique= s_unique,
                              multipole_measured= multipolesMean_measured[:,0],
                              multipole_correct= multipolesMean_correct[:,0],
@@ -267,7 +266,7 @@ mp.plot_multipole_measVScorr(l_value= lValues[0],
                              err_multipole_correct=multipolesStd_correct[:,0],
                              base_path= "graphs/z1")
 
-multipoleMean_ratio, multipoleStd_ratio = mp.plot_multipole_ratio(l_value= lValues[0],
+multipoleMean_ratio, multipoleStd_ratio = prj.plot_multipole_ratio(l_value= lValues[0],
                                                                   s_unique= s_unique,
                                                                   multipole_measured= multipolesMean_measured[:,0],
                                                                   multipole_correct= multipolesMean_correct[:,0] ,
