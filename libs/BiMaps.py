@@ -23,6 +23,8 @@ def plot_contourf(coords: str,
                   kind: str,
                   xlim: Optional[Tuple[float, float]] = None,
                   ylim: Optional[Tuple[float, float]] = None,
+                  v_min: Optional[float] = None,
+                  v_max: Optional[float] = None,
                   lvls: int = 20,
                   draw_lines: bool = False
 ) -> Tuple[
@@ -55,6 +57,10 @@ def plot_contourf(coords: str,
         Limits for the x-axis of the plot.
     ylim : tuple of float, optional
         Limits for the y-axis of the plot.
+    v_min : float, optional
+        Minimum value for the color scale.
+    v_max : float, optional
+        Maximum value for the color scale.
     lvls : int, optional
         Number of contour levels used in the filled contour plot.
     draw_lines : bool, optional
@@ -112,7 +118,7 @@ def plot_contourf(coords: str,
     X, Y = np.meshgrid(x_unique, y_unique)
 
     plt.figure(figsize=(9,8), num=f"2D map {coords} {kind}")
-    contour = plt.contourf(X, Y, Z, levels=lvls, cmap='turbo')
+    contour = plt.contourf(X, Y, Z, levels=lvls, cmap='turbo', vmin=v_min, vmax=v_max)
     
     # contour lines
     if draw_lines:
@@ -147,21 +153,20 @@ def plot_contourf(coords: str,
 def plot_contourf_ratio(coords: str,
                         x_array: npt.NDArray[np.float64],
                         y_array: npt.NDArray[np.float64],
-                        z_array_measured: npt.NDArray[np.float64],
-                        z_array_correct: npt.NDArray[np.float64],
+                        z_array_ratio: npt.NDArray[np.float64],
                         base_path: str,
                         xlim: Optional[Tuple[float, float]] = None,
                         ylim: Optional[Tuple[float, float]] = None,
                         lvls: int = 20,
-                        draw_lines: bool = False,
                         v_min: Optional[float] = None,
                         v_max: Optional[float] = None,
                         z_min: Optional[float] = None,
-                        z_max: Optional[float] = None
-) -> npt.NDArray[np.float64]:
+                        z_max: Optional[float] = None,
+                        draw_lines: bool = False
+) -> None:
     """
     Generate a filled contour plot of the ratio between measured and
-    corrected correlation functions in either (μ, s) or (rₚ, π) coordinates,
+    correct correlation functions in either (μ, s) or (rₚ, π) coordinates,
     and save the resulting map to file.
 
     Parameters
@@ -173,12 +178,9 @@ def plot_contourf_ratio(coords: str,
         Array containing the x-coordinate values (μ or rₚ) for each point.
     y_array : np.ndarray
         Array containing the y-coordinate values (s or π) for each point.
-    z_array_measured : np.ndarray
-        Array of measured 2-points correlation function values arranged consistently
-        with `(x_array, y_array)`.
-    z_array_correct : np.ndarray
-        Array of corrected 2-points correlation function values, used to compute the
-        ratio with `z_array_measured`.
+    z_array_ratio : np.ndarray
+        Array of the ratio between measured and correct 2-points correlation
+        function values arranged consistently with `(x_array, y_array)`.
     base_path : str
         Path to the directory in which the output figure will be saved.
     xlim : tuple of float, optional
@@ -187,25 +189,28 @@ def plot_contourf_ratio(coords: str,
         Limits for the y-axis of the plot.
     lvls : int, optional
         Number of contour levels used in the filled contour plot.
+    v_min : float, optional
+        Minimum value for the color scale.
+    v_max : float, optional
+        Maximum value for the color scale.
+    z_min : float, optional
+        Values with absolute magnitude below this threshold are masked
+        (set to NaN) in the ratio map.
+    z_max : float, optional
+        Values with absolute magnitude above this threshold are masked
+        (set to NaN) in the ratio map.
     draw_lines : bool, optional
         If `True`, contour lines are drawn on top of the filled map.
 
     Returns
     -------
-    np.ndarray
-        Array of the element-wise ratio `z_array_measured / z_array_correct`,
-        with the same shape as the reshaped input arrays and transposed when
-        `coords == "RpPI"`.
+    None
+        The function plots the contourf plot of the ratio between measured and correct
+        correlation function.
     """
     
     x_unique = np.unique(x_array)
     y_unique = np.unique(y_array)
-    z_array_ratio = np.divide(
-        z_array_measured,
-        z_array_correct,
-        out=np.full_like(z_array_measured, np.nan),
-        where=(z_array_correct != 0)
-    )
 
     # check for coords to be either "SMU" or "RpPI"
     valid_coords = ["SMU", "RpPI"]
@@ -276,8 +281,6 @@ def plot_contourf_ratio(coords: str,
     plt.title(fr'2D map of $\frac{{\xi_\mathrm{{measured}}}}{{\xi_\mathrm{{correct}}}} {SR}$')
     plt.tight_layout()
     plt.savefig(f"{base_path}/2Dmap{coords}_ratio.pdf", dpi=600)
-
-    return z_array_ratio
 
 
 def plot_imshow(coords: str,
@@ -418,8 +421,7 @@ def plot_imshow(coords: str,
 def plot_imshow_ratio(coords: str,
                       x_array: npt.NDArray[np.float64],
                       y_array: npt.NDArray[np.float64],
-                      z_array_measured: npt.NDArray[np.float64],
-                      z_array_correct: npt.NDArray[np.float64],
+                      z_array_ratio: npt.NDArray[np.float64],
                       base_path: str,
                       xlim: Optional[Tuple[float, float]] = None,
                       ylim: Optional[Tuple[float, float]] = None,
@@ -428,10 +430,10 @@ def plot_imshow_ratio(coords: str,
                       z_min: Optional[float] = None,
                       z_max: Optional[float] = None,
                       interp: str = "nearest"
-) -> npt.NDArray[np.float64]:
+) -> None:
     """
     Generate an image plot (imshow) of the ratio between measured and
-    corrected correlation functions in either (μ, s) or (rₚ, π) coordinates,
+    correct correlation functions in either (μ, s) or (rₚ, π) coordinates,
     optionally setting color limits and masking extreme values, and save the
     resulting figure to file.
 
@@ -444,12 +446,9 @@ def plot_imshow_ratio(coords: str,
         Array containing the x-coordinate values (μ or rₚ) for each point.
     y_array : np.ndarray
         Array containing the y-coordinate values (s or π) for each point.
-    z_array_measured : np.ndarray
-        Array of measured 2-points correlation function values arranged consistently
-        with `(x_array, y_array)`.
-    z_array_correct : np.ndarray
-        Array of corrected 2-points correlation function values, used to compute the
-        ratio with `z_array_measured`.
+    z_array_ratio : np.ndarray
+        Array of the ratio between measured and correct 2-points correlation
+        function values arranged consistently with `(x_array, y_array)`.
     base_path : str
         Path to the directory in which the output figure will be saved.
     kind : str
@@ -475,20 +474,13 @@ def plot_imshow_ratio(coords: str,
 
     Returns
     -------
-    np.ndarray
-        Array of the element-wise ratio `z_array_measured / z_array_correct`,
-        with the same shape as the reshaped input arrays and transposed when
-        `coords == "RpPI"`.
+    None
+        The function plots the contourf plot of the ratio between measured and correct
+        correlation function.
     """
 
     x_unique = np.unique(x_array)
     y_unique = np.unique(y_array)
-    z_array_ratio = np.divide(
-        z_array_measured,
-        z_array_correct,
-        out=np.full_like(z_array_measured, np.nan),
-        where=(z_array_correct != 0)
-    )
 
     # check for coords to be either "SMU" or "RpPI"
     valid_coords = ["SMU", "RpPI"]
@@ -559,4 +551,214 @@ def plot_imshow_ratio(coords: str,
     plt.tight_layout()
     plt.savefig(f"{base_path}/imshow{coords}_ratio.pdf", dpi=600)
 
-    return z_array_ratio
+
+def plot_covarianceMatrix(coords: str,
+                          scale: npt.NDArray[np.float64],
+                          cov: npt.NDArray[np.float64],
+                          base_path: str,
+                          kind: str,
+                          fig: str,
+                          filename: str,
+                          xlim: Optional[Tuple[float, float]] = None,
+                          ylim: Optional[Tuple[float, float]] = None,
+                          v_min: Optional[float] = None,
+                          v_max: Optional[float] = None,
+                          interp: str = "nearest"
+) -> None:
+    """
+    Generate an image plot (imshow) of the given covariance matrix,
+    optionally setting color limits, and save the resulting figure to file.
+
+    Parameters
+    ----------
+    coords : str
+        Coordinate system of the input data. Must be either `"SMU"` for
+        (μ, s) or `"RpPI"` for (rₚ, π).
+    scale : np.ndarray
+        Array containing the unique scale values (s or rₚ) for each point.
+    cov : np.ndarray
+        Covariance matrix, shaped like `(len(scale), len(scale))`.
+    base_path : str
+        Path to the directory in which the output figure will be saved.
+    kind : str
+        Type of correlation map to plot. Must be either `"measured"`,
+        `"correct"` or `"ratio"`. Used for labeling the plot.
+    fig : str
+        `num` value to feed `plt.figure`.
+    filename : str
+        Name for the file to be saved.
+    xlim : tuple of float, optional
+        Limits for the x-axis of the plot.
+    ylim : tuple of float, optional
+        Limits for the y-axis of the plot.
+    v_min : float, optional
+        Minimum value for the color scale
+        from imshow plot.
+    v_max : float, optional
+        Maximum value for the color scale.
+    interp : str, optional
+        Interpolation formula used in imshow. Default is `"nearest"`.
+        Typical formulae: "nearest" (no smoothing), "bilinear" (smooth gradient), "bicubic" (even smoother).
+
+    Returns
+    -------
+    None
+        The functon plots the covariance matrix.
+    """
+
+    # check for coords to be either "SMU" or "RpPI"
+    valid_coords = ["SMU", "RpPI"]
+    if coords == "SMU":
+        x_label = r'$s \,[h^{-1} \, \mathrm{Mpc}]$'
+        y_label = r'$s \,[h^{-1} \, \mathrm{Mpc}]$'
+
+    elif coords == "RpPI":
+        x_label = r'$r_\mathrm{p} \,[h^{-1} \, \mathrm{Mpc}]$'
+        y_label = r'$r_\mathrm{p} \,[h^{-1} \, \mathrm{Mpc}]$'
+
+    else:
+        raise ValueError(f"coords must be one of {valid_coords}, got '{coords}'")
+
+    # check for kind to be either "measured" or "correct"
+    valid_kinds = ["measured", "correct"]
+    if kind not in valid_kinds:
+        raise ValueError(f"kind must be one of {valid_kinds}, got '{kind}'")
+
+    # this is for the imshow to have physical coordinate axes instead of pixels
+    extent = [
+        scale.min(), scale.max(),
+        scale.min(), scale.max()
+    ]
+
+    plt.figure(figsize=(9, 8), num=fig + " " + kind)
+
+    img = plt.imshow(cov,
+                     origin="lower",
+                     extent=extent, # type: ignore
+                     cmap="RdBu_r",
+                     aspect="equal",
+                     vmin=v_min,
+                     vmax=v_max,
+                     interpolation=interp)
+
+    cbar = plt.colorbar(img, label=fr'$C^\mathrm{{{kind}}}$')
+
+    if xlim is not None:
+        plt.xlim(xlim)
+    if ylim is not None:
+        plt.ylim(ylim)
+
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
+    plt.title(fig + " " + kind)
+    plt.tight_layout()
+    plt.savefig(f"{base_path}/{filename}.pdf", dpi=600)
+
+
+def plot_correlationMatrix(coords: str,
+                           scale: npt.NDArray[np.float64],
+                           cov: npt.NDArray[np.float64],
+                           base_path: str,
+                           kind: str,
+                           fig: str,
+                           filename: str,
+                           xlim: Optional[Tuple[float, float]] = None,
+                           ylim: Optional[Tuple[float, float]] = None,
+                           v_min: float = -1.0,
+                           v_max: float = 1.0,
+                           interp: str = "nearest"
+) -> None:
+    """
+    Generate an image plot (imshow) of the correlation matrix derived from 
+    the given covariance matrix, and save the resulting figure to file.
+
+    Parameters
+    ----------
+    coords : str
+        Coordinate system of the input data. Must be either `"SMU"` for
+        (μ, s) or `"RpPI"` for (rₚ, π).
+    scale : np.ndarray
+        Array containing the unique scale values (s or rₚ) for each point.
+    cov : np.ndarray
+        Covariance matrix, shaped like `(len(scale), len(scale))`.
+    base_path : str
+        Path to the directory in which the output figure will be saved.
+    kind : str
+        Type of correlation map to plot. Must be either `"measured"`,
+        `"correct"` or `"ratio"`. Used for labeling the plot.
+    fig : str
+        `num` value to feed `plt.figure`.
+    filename : str
+        Name for the file to be saved.
+    xlim : tuple of float, optional
+        Limits for the x-axis of the plot.
+    ylim : tuple of float, optional
+        Limits for the y-axis of the plot.
+    v_min : float, optional
+        Minimum value for the color scale from imshow plot.
+        Default is `-1.0`, determined by the definition of the correlation matrix.
+    v_max : float, optional
+        Maximum value for the color scale.
+        Default is `1.0`, determined by the definition of the correlation matrix.
+    interp : str, optional
+        Interpolation formula used in imshow. Default is `"nearest"`.
+        Typical formulae: "nearest" (no smoothing), "bilinear" (smooth gradient), "bicubic" (even smoother).
+
+    Returns
+    -------
+    None
+        The functon computes and plots the correlation matrix.
+    """
+    
+    # covariance to correlation matrix
+    std = np.sqrt(np.diag(cov))
+    outer_v = np.outer(std, std)
+    corr = np.divide(cov, outer_v, out=np.zeros_like(cov), where=outer_v!=0)
+
+    # check for coords to be either "SMU" or "RpPI"
+    valid_coords = ["SMU", "RpPI"]
+    if coords == "SMU":
+        x_label = r'$s \,[h^{-1} \, \mathrm{Mpc}]$'
+        y_label = r'$s \,[h^{-1} \, \mathrm{Mpc}]$'
+
+    elif coords == "RpPI":
+        x_label = r'$r_\mathrm{p} \,[h^{-1} \, \mathrm{Mpc}]$'
+        y_label = r'$r_\mathrm{p} \,[h^{-1} \, \mathrm{Mpc}]$'
+
+    else:
+        raise ValueError(f"coords must be one of {valid_coords}, got '{coords}'")
+
+    # check for kind to be either "measured" or "correct"
+    valid_kinds = ["measured", "correct"]
+    if kind not in valid_kinds:
+        raise ValueError(f"kind must be one of {valid_kinds}, got '{kind}'")
+
+    # this is for the imshow to have physical coordinate axes instead of pixels
+    extent = [
+        scale.min(), scale.max(),
+        scale.min(), scale.max()
+    ]
+
+    plt.figure(figsize=(9, 8), num=fig + " " + kind)
+
+    img = plt.imshow(corr,
+                     origin="lower",
+                     extent=extent, # type: ignore
+                     cmap="RdBu_r",
+                     aspect="equal",
+                     vmin=v_min,
+                     vmax=v_max,
+                     interpolation=interp)
+
+    cbar = plt.colorbar(img, label=fr'$R^\mathrm{{{kind}}}$')
+
+    if xlim is not None:
+        plt.xlim(xlim)
+    if ylim is not None:
+        plt.ylim(ylim)
+
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
+    plt.title(fig + " " + kind)
+    plt.tight_layout()
+    plt.savefig(f"{base_path}/{filename}.pdf", dpi=600)

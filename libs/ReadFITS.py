@@ -293,6 +293,9 @@ def readFITS_pairs_series_SMU(base_path: str,
     npt.NDArray[np.float64],
     npt.NDArray[np.float64],
     npt.NDArray[np.float64],
+    npt.NDArray[np.float64],
+    npt.NDArray[np.float64],
+    npt.NDArray[np.float64],
     npt.NDArray[np.float64]
 ]:
     """
@@ -330,6 +333,15 @@ def readFITS_pairs_series_SMU(base_path: str,
         - `rr_matrix` : np.ndarray
             Array of shape `(n_files, n_elements)` containing the random-random
             raw pair counts from each file.
+        - `Ndd_matrix` : np.ndarray
+            Array of shape `(n_files, 1)` containing the normalisation
+            factor for the data-data pair counts.
+        - `Ndr_matrix` : np.ndarray
+            Array of shape `(n_files, 1)` containing the normalisation
+            factor for the data-random pair counts.
+        - `Nrr_matrix` : np.ndarray
+            Array of shape `(n_files, 1)` containing the normalisation
+            factor for the random-random pair counts.
 
     Notes
     -----
@@ -342,6 +354,9 @@ def readFITS_pairs_series_SMU(base_path: str,
     dd_matrix = np.zeros((n_files, n_elements))
     dr_matrix = np.zeros((n_files, n_elements))
     rr_matrix = np.zeros((n_files, n_elements))
+    Ndd_matrix = np.zeros((n_files, 1), dtype=np.float64)
+    Ndr_matrix = np.zeros((n_files, 1), dtype=np.float64)
+    Nrr_matrix = np.zeros((n_files, 1), dtype=np.float64)
     
     for i in range(0,n_files):
         filepath = f"{base_path}/EUC_LE3_GCL_2PCF_EuclidLargeMocks{i+1:04d}_Rot30degCircle_m3_z0p9-1p1_PAIRS_AUTO_2DPOL.fits"
@@ -352,7 +367,7 @@ def readFITS_pairs_series_SMU(base_path: str,
             table_hdu = hdul[1] # HDU 0 is an empty header that precedes the actual table
             table_data = table_hdu.data # type: ignore
                                         # comment to ignore Pylance warning
-            
+
             nData = table_data.shape[0]
             nColumns = len(table_data.columns)
 
@@ -365,17 +380,23 @@ def readFITS_pairs_series_SMU(base_path: str,
                 dd_matrix[i] = table_data[names[2]]
                 dr_matrix[i] = table_data[names[3]]
                 rr_matrix[i] = table_data[names[4]]
-            
+                Ndd_matrix[i] = table_hdu.header["PAIR_DD"] # type: ignore
+                Ndr_matrix[i] = table_hdu.header["PAIR_DR"] # type: ignore
+                Nrr_matrix[i] = table_hdu.header["PAIR_RR"] # type: ignore
+
             else:
                 print(f"File {i+1}: {nData} points instead of {n_elements} and {nColumns} columns instead of 5")
     
-    return s_matrix, mu_matrix, dd_matrix, dr_matrix, rr_matrix
+    return s_matrix, mu_matrix, dd_matrix, dr_matrix, rr_matrix, Ndd_matrix, Ndr_matrix, Nrr_matrix
 
 
 def readFITS_pairs_series_RpPI(root_folder: str,
                                n_elements: int,
                                kind: str
 ) -> Tuple[
+    npt.NDArray[np.float64],
+    npt.NDArray[np.float64],
+    npt.NDArray[np.float64],
     npt.NDArray[np.float64],
     npt.NDArray[np.float64],
     npt.NDArray[np.float64],
@@ -417,6 +438,15 @@ def readFITS_pairs_series_RpPI(root_folder: str,
         - `rr_matrix` : np.ndarray
             Array of shape `(n_files, n_elements)` containing the random-random
             pair counts from each file.
+        - `Ndd_matrix` : np.ndarray
+            Array of shape `(n_files, 1)` containing the normalisation
+            factor for the data-data pair counts.
+        - `Ndr_matrix` : np.ndarray
+            Array of shape `(n_files, 1)` containing the normalisation
+            factor for the data-random pair counts.
+        - `Nrr_matrix` : np.ndarray
+            Array of shape `(n_files, 1)` containing the normalisation
+            factor for the random-random pair counts.
 
     Notes
     -----
@@ -452,6 +482,9 @@ def readFITS_pairs_series_RpPI(root_folder: str,
     dd_matrix = np.zeros((n_files, n_elements))
     dr_matrix = np.zeros((n_files, n_elements))
     rr_matrix = np.zeros((n_files, n_elements))
+    Ndd_matrix = np.zeros((n_files, 1), dtype=np.float64)
+    Ndr_matrix = np.zeros((n_files, 1), dtype=np.float64)
+    Nrr_matrix = np.zeros((n_files, 1), dtype=np.float64)
 
     for i, folder in enumerate(folders):
         
@@ -488,8 +521,11 @@ def readFITS_pairs_series_RpPI(root_folder: str,
                 dd_matrix[i] = table_data[names[2]]
                 dr_matrix[i] = table_data[names[3]]
                 rr_matrix[i] = table_data[names[4]]
+                Ndd_matrix[i] = table_hdu.header["PAIR_DD"] # type: ignore
+                Ndr_matrix[i] = table_hdu.header["PAIR_DR"] # type: ignore
+                Nrr_matrix[i] = table_hdu.header["PAIR_RR"] # type: ignore
             
             else:
                 print(f"File {i+1}: {nData} points instead of {n_elements} and {nColumns} columns instead of 5")
     
-    return rp_matrix, pi_matrix, dd_matrix, dr_matrix, rr_matrix
+    return rp_matrix, pi_matrix, dd_matrix, dr_matrix, rr_matrix, Ndd_matrix, Ndr_matrix, Nrr_matrix

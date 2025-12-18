@@ -8,9 +8,9 @@ from typing import Optional
 def compute_xi(dd: npt.NDArray[np.float64],
                dr: npt.NDArray[np.float64],
                rr: npt.NDArray[np.float64],
-               Nd: Optional[int] = None,
-               Nr: Optional[int] = None,
-               eps: float = 1e-12
+               Ndd: npt.NDArray[np.float64],
+               Ndr: npt.NDArray[np.float64],
+               Nrr: npt.NDArray[np.float64]
 ) -> npt.NDArray[np.float64]:
     """
     Compute the 2-point correlation function `ξ(s, μ)` using the Landy-Szalay estimator.
@@ -26,58 +26,37 @@ def compute_xi(dd: npt.NDArray[np.float64],
     Parameters
     ----------
     dd : np.ndarray
-        Raw data-data pair counts, can be a 1D or 2D array depending on the
-        (s, μ) binning.
+        Raw data-data pair counts, shaped `(n_files, n_elements)`
     dr : np.ndarray
         Raw data-random pair counts, same shape as dd.
     rr : np.ndarray
         Raw random-random pair counts, same shape as dd.
-    Nd: int, optional
-        Total number of objects in the data catalogues.
-    Nr: int, optional
-        Total number of objects in the random catalogues.
-    eps: float, optional
-        Small number to avoid division by zero. Default is `1e-12`
+    Nd: np.ndarray
+        Total number of objects in the data catalogues, shaped `(n_files, 1)`.
+    Nr: np.ndarray
+        Total number of objects in the random catalogues, same shape as Nd.
 
     Returns
     -------
     np.ndarray
         Correlation function ξ(s, μ) evaluated for each bin. Same shape as
         input arrays. Bins with RR=0 are set to zero to avoid division by zero.
-
-    Notes
-    -----
-    - Inputs are automatically converted to floating point arrays to ensure
-      correct division.
-    - The function handles 1D or flattened 2D arrays consistently.
     """
-
+    
     # ensure floating point division
-    dd = np.asarray(dd, dtype=float)
-    dr = np.asarray(dr, dtype=float)
-    rr = np.asarray(rr, dtype=float)
+    dd_f = np.asarray(dd, dtype=np.float64)
+    dr_f = np.asarray(dr, dtype=np.float64)
+    rr_f = np.asarray(rr, dtype=np.float64)
+    Ndd_f = np.asarray(Ndd, dtype=np.float64)
+    Ndr_f = np.asarray(Ndr, dtype=np.float64)
+    Nrr_f = np.asarray(Nrr, dtype=np.float64)
 
-    xi = np.zeros_like(dd)
+    # normalise pair counts
+    DD = dd_f / Ndd_f
+    DR = dr_f / Ndr_f
+    RR = rr_f / Nrr_f
 
-    if (Nd is not None) and (Nr is not None):
-        # normalise pair counts
-        DD = (2 * dd) / (Nd * (Nd - 1))
-        DR = dr / (Nd * Nr)
-        RR = (2 * rr) / (Nr * (Nr - 1))
-
-    else:
-        # in case we don't know Nd and Nr, normalize by total pairs per file (per-array sums)
-        sum_DD = dd.sum(axis=1, keepdims=True) # shape (n_files, 1)
-        sum_DR = dr.sum(axis=1, keepdims=True)
-        sum_RR = rr.sum(axis=1, keepdims=True)
-
-        DD = dd / sum_DD
-        DR = dr / sum_DR
-        RR = rr / sum_RR
-
-    # avoid dividing by zero
-    mask = RR > eps
-    xi[mask] = (DD[mask] - 2*DR[mask] + RR[mask]) / RR[mask]
+    xi = (DD - 2.0*DR + RR) / RR
 
     return xi
 

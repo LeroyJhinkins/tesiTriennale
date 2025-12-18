@@ -172,7 +172,7 @@ def plot_multipole(l_value: int,
     else:
         err_y = None
 
-    plt.errorbar(s_unique, y, yerr=err_y, label=label, linestyle='--', linewidth=0.6, marker='o', markersize=2, capsize=2)
+    plt.errorbar(s_unique, y, yerr=err_y, label=label, linestyle='--', linewidth=0.9, marker='o', markersize=3, capsize=1, elinewidth=0.6)
 
     plt.title(fr"Multipole $l={l_value}$")
     
@@ -255,8 +255,8 @@ def plot_multipole_measVScorr(l_value: int,
     else:
         err_y_correct = None
 
-    plt.errorbar(s_unique, y_measured, yerr=err_y_measured, label=label_measured, linestyle='--', linewidth=0.6, marker='o', markersize=2, capsize=2)
-    plt.errorbar(s_unique, y_correct, yerr=err_y_correct, label=label_correct, linestyle='--', linewidth=0.6, marker='o', markersize=2, capsize=2)
+    plt.errorbar(s_unique, y_measured, yerr=err_y_measured, label=label_measured, linestyle='--', linewidth=1.0, marker='o', markersize=3, capsize=1, elinewidth=0.6)
+    plt.errorbar(s_unique, y_correct, yerr=err_y_correct, label=label_correct, linestyle='--', linewidth=1.0, marker='o', markersize=3, capsize=1, elinewidth=0.6)
 
     plt.title(fr"Multipole $l={l_value}$ Measured VS Correct")
     
@@ -278,19 +278,14 @@ def plot_multipole_measVScorr(l_value: int,
 
 def plot_multipole_ratio(l_value: int,
                          s_unique: npt.NDArray[np.float64],
-                         multipole_measured: npt.NDArray[np.float64],
-                         multipole_correct: npt.NDArray[np.float64],
+                         multipole_ratio: npt.NDArray[np.float64],
                          base_path: str,
-                         err_multipole_measured: Optional[npt.NDArray[np.float64]] = None,
-                         err_multipole_correct: Optional[npt.NDArray[np.float64]] = None,
+                         err_multipole_ratio: Optional[npt.NDArray[np.float64]] = None,
                          xlim: Optional[Tuple[float, float]] = None,
                          ylim: Optional[Tuple[float, float]] = None
-) -> Tuple[
-    npt.NDArray[np.float64],
-    Optional[npt.NDArray[np.float64]]
-]:
+) -> None:
     """
-    Compute and plot the ratio of measured to corrected multipoles of the correlation
+    Plot the ratio of measured to corrected multipole of the correlation
     function as a function of separation s, optionally including propagated
     errors, and save the figure to file.
 
@@ -299,19 +294,15 @@ def plot_multipole_ratio(l_value: int,
     l_value : int
         Multipole order ℓ corresponding to the multipoles.
     s_unique : np.ndarray
-        Array of unique separation values s at which the multipoles are evaluated.
-    multipole_measured : np.ndarray
-        Array of measured multipole values for each separation in `s_unique`.
-    multipole_correct : np.ndarray
-        Array of corrected multipole values for each separation in `s_unique`.
+        Array of unique separation values s at which the multipole is evaluated.
+    multipole_ratio : np.ndarray
+        Array of ratio between measured and correct multipole values for each
+        separation in `s_unique`.
     base_path : str
         Path to the directory in which the output figure will be saved.
-    err_multipole_measured : np.ndarray, optional
-        Error estimates associated with the measured multipoles. If provided,
-        they are used to compute the propagated error of the ratio.
     err_multipole_correct : np.ndarray, optional
-        Error estimates associated with the corrected multipoles. If provided,
-        they are used to compute the propagated error of the ratio.
+        Error estimates associated with the ratio between measured and correct multipoles.
+        If provided, they are used to add error bars.
     xlim : tuple of float, optional
         Limits for the x-axis of the plot.
     ylim : tuple of float, optional
@@ -319,45 +310,16 @@ def plot_multipole_ratio(l_value: int,
 
     Returns
     -------
-    tuple
-        A tuple `(multipole_ratio, err_ratio)` where:
-        - `multipole_ratio` is an array of the element-wise ratio
-          `multipole_measured / multipole_correct`.
-        - `err_ratio` is an array of the propagated errors for the ratio, or
-          `None` if error arrays were not provided.
+    None
+        The function plots the ratio between the measured and the correct ℓ-th multipole,
+        optionally with error bars.
     """
-
-    multipole_ratio = np.divide(
-        multipole_measured,
-        multipole_correct,
-        out=np.full_like(multipole_measured, np.nan),
-        where=(multipole_correct != 0)
-    )
-
-    if err_multipole_measured is not None and err_multipole_correct is not None:
-        
-        term1 = np.divide(
-            err_multipole_measured, multipole_correct,
-            out=np.zeros_like(err_multipole_measured),
-            where=(multipole_correct != 0)
-        )
-
-        term2 = np.divide(
-            multipole_measured * err_multipole_correct, multipole_correct**2,
-            out=np.zeros_like(err_multipole_measured),
-            where=(multipole_correct != 0)
-        )
-
-        err_ratio = np.sqrt(term1**2 + term2**2)
-
-    else:
-        err_ratio = None
 
     plt.figure(figsize=(8, 8), num="Ratio multipole plot")
 
     label = fr"$\frac{{\xi_{l_value}^{{\mathrm{{measured}}}}}}{{\xi_{l_value}^{{\mathrm{{correct}}}}}}$"
 
-    plt.errorbar(s_unique, multipole_ratio, yerr=err_ratio, label=label, linestyle='--', linewidth=0.6, marker='o', markersize=2, capsize=2)
+    plt.errorbar(s_unique, multipole_ratio, yerr=err_multipole_ratio, label=label, linestyle='--', linewidth=1.0, marker='o', markersize=3, capsize=1, elinewidth=0.6)
 
     plt.title(fr"Ratio multipole $l={l_value}$")
     
@@ -375,8 +337,6 @@ def plot_multipole_ratio(l_value: int,
     plt.tight_layout()
     
     plt.savefig(f"{base_path}/multipole{l_value}_ratio.pdf", dpi=600)
-
-    return multipole_ratio, err_ratio
 
 
 # ================================================================================================================================= #
@@ -497,7 +457,7 @@ def plot_clusteringWedges(n_wedges: int,
         else:
             err_y = None
 
-        plt.errorbar(s_unique, y, yerr=err_y, label=label, linestyle='--', linewidth=0.6, marker='o', markersize=2, capsize=2)
+        plt.errorbar(s_unique, y, yerr=err_y, label=label, linestyle='--', linewidth=1.0, marker='o', markersize=3, capsize=1, elinewidth=0.6)
 
     plt.title(f"{n_wedges} clustering wedges")
     
@@ -587,8 +547,8 @@ def plot_clusteringWedges_measVScorr(n_wedges: int,
         else:
             err_y_correct = None
 
-        plt.errorbar(s_unique, y_measured, yerr=err_y_measured, label=label_measured, linestyle='--', linewidth=0.6, marker='o', markersize=2, capsize=2)
-        plt.errorbar(s_unique, y_correct, yerr=err_y_correct, label=label_correct, linestyle='--', linewidth=0.6, marker='o', markersize=2, capsize=2)
+        plt.errorbar(s_unique, y_measured, yerr=err_y_measured, label=label_measured, linestyle='--', linewidth=1.0, marker='o', markersize=3, capsize=1, elinewidth=0.6)
+        plt.errorbar(s_unique, y_correct, yerr=err_y_correct, label=label_correct, linestyle='--', linewidth=1.0, marker='o', markersize=3, capsize=1, elinewidth=0.6)
 
     plt.title(f"{n_wedges} clustering wedges Measured VS Correct")
     
@@ -610,20 +570,15 @@ def plot_clusteringWedges_measVScorr(n_wedges: int,
 
 def plot_clusteringWedges_ratio(n_wedges: int,
                                 s_unique: npt.NDArray[np.float64],
-                                wedges_measured: npt.NDArray[np.float64],
-                                wedges_correct: npt.NDArray[np.float64],
+                                wedges_ratio: npt.NDArray[np.float64],
                                 base_path: str,
-                                err_wedges_measured: Optional[npt.NDArray[np.float64]] = None,
-                                err_wedges_correct: Optional[npt.NDArray[np.float64]] = None,
+                                err_wedges_ratio: Optional[npt.NDArray[np.float64]] = None,
                                 xlim: Optional[Tuple[float, float]] = None,
                                 ylim: Optional[Tuple[float, float]] = None
-) -> Tuple[
-    npt.NDArray[np.float64],
-    Optional[npt.NDArray[np.float64]]
-]:
+) -> None:
     """
-    Plot the ratio between measured and correct clustering wedges, compute
-    the propagated uncertainties, and save the resulting figure to file.
+    Plot the ratio between measured and correct clustering wedges
+    and save the resulting figure to file.
 
     Parameters
     ----------
@@ -632,18 +587,13 @@ def plot_clusteringWedges_ratio(n_wedges: int,
         `n_wedges` bins of equal width.
     s_unique : np.ndarray
         Array of unique separation values s at which the wedges are evaluated.
-    wedges_measured : np.ndarray
-        Measured clustering wedges, with shape `(n_wedges, len(s_unique))`.
-    wedges_correct : np.ndarray
-        Corrected clustering wedges, shaped like `wedges_measured`.
+    wedges_ratio : np.ndarray
+        Measured clustering wedges ratio, with shape `(n_wedges, len(s_unique))`.
     base_path : str
         Path to the directory in which the output figure will be saved.
-    err_wedges_measured : np.ndarray, optional
-        Error estimates for the measured wedges. If provided together with
-        `err_wedges_correct`, error bars on the ratio are computed.
-    err_wedges_correct : np.ndarray, optional
-        Error estimates for the corrected wedges, used in the uncertainty
-        propagation of the ratio.
+    err_wedges_ratio : np.ndarray, optional
+        Error estimates for the ratio of wedges. If provided, error bars on
+        the ratio are computed.
     xlim : tuple of float, optional
         Limits for the x-axis of the plot.
     ylim : tuple of float, optional
@@ -651,41 +601,12 @@ def plot_clusteringWedges_ratio(n_wedges: int,
 
     Returns
     -------
-    tuple
-        A pair `(wedges_ratio, err_ratio)`, where:
-        - `wedges_ratio` is the element-wise ratio between measured and
-          corrected wedges, shaped `(n_wedges, len(s_unique))`.
-        - `err_ratio` contains the propagated uncertainties of the ratio, or
-          `None` if the error inputs are not provided.
+    None
+        The function plots the ratio between measured and correct clustering wedges,
+        optionally with error bars.
     """
 
     mu_edges = np.linspace(0.0, 1.0, n_wedges + 1)
-
-    wedges_ratio = np.divide(
-        wedges_measured,
-        wedges_correct,
-        out=np.full_like(wedges_measured, np.nan),
-        where=(wedges_correct != 0)
-    )
-
-    if err_wedges_measured is not None and err_wedges_correct is not None:
-        
-        term1 = np.divide(
-            err_wedges_measured, wedges_correct,
-            out=np.zeros_like(err_wedges_measured),
-            where=(wedges_correct != 0)
-        )
-
-        term2 = np.divide(
-            wedges_measured * err_wedges_correct, wedges_correct**2,
-            out=np.zeros_like(err_wedges_measured),
-            where=(wedges_correct != 0)
-        )
-
-        err_ratio = np.sqrt(term1**2 + term2**2)
-
-    else:
-        err_ratio = None
 
     plt.figure(figsize=(8, 8), num="Ratio Measured VS Correct")
 
@@ -698,12 +619,12 @@ def plot_clusteringWedges_ratio(n_wedges: int,
 
         y = wedges_ratio[w]
         
-        if err_ratio is not None:
-            err_y = err_ratio[w]
+        if err_wedges_ratio is not None:
+            err_y = err_wedges_ratio[w]
         else:
             err_y = None
 
-        plt.errorbar(s_unique, y, yerr=err_y, label=label, linestyle='--', linewidth=0.6, marker='o', markersize=2, capsize=2)    
+        plt.errorbar(s_unique, y, yerr=err_y, label=label, linestyle='--', linewidth=1.0, marker='o', markersize=3, capsize=1, elinewidth=0.6)    
 
     plt.title(f"{n_wedges} clustering wedges ratio")
 
@@ -721,8 +642,6 @@ def plot_clusteringWedges_ratio(n_wedges: int,
     plt.tight_layout()
 
     plt.savefig(f"{base_path}/{n_wedges}clustWedge_ratio.pdf", dpi=600)
-
-    return wedges_ratio, err_ratio
 
 
 def compute_clusteringWedges_BAOpeaks(n_wedges: int,
@@ -895,38 +814,90 @@ def print_clusteringWedges_BAOintervals(n_wedges: int,
         print()
 
 
-def compute_muMax(s_array: npt.NDArray[np.float64],
-                  mu_array: npt.NDArray[np.float64],
-                  xi_array: npt.NDArray[np.float64],
-                  mu_max: float,
+def compute_muMax(s_matrix: npt.NDArray[np.float64],
+                  mu_matrix: npt.NDArray[np.float64],
+                  xi_matrix: npt.NDArray[np.float64],
+                  mu_max_values: npt.NDArray[np.float32],
                   base_path: str,
                   xlim: Optional[Tuple[float, float]] = None,
                   ylim: Optional[Tuple[float, float]] = None,
                   delta_mu: float = 0.01
-) -> npt.NDArray[np.float64]:
+) -> None:
+    """
+    Computes and plots the normalized cumulative μ-integrated correlation:
+        Xi(s; mu_max) = (1 / mu_max) ∫_0^{mu_max} xi(s,mu) dmu
 
-    s_unique = np.unique(s_array)
-    xi_muMax = np.zeros(len(s_unique))
+    for several values of mu_max using multiple realizations to estimate errors.
 
-    for i, s in enumerate(s_unique):
+    Parameters
+    ----------
+    s_matrix : np.ndarray
+        Matrix of separation values.
+        Shaped `(n_files, n_elements)`.
+    mu_matrix : np.ndarray
+        Matrix of mu values.
+        Same shape as `s_matrix`.
+    xi_matrix : np.ndarray
+        Matrix of 2-point correlation function data.
+        Same shape as `s_matrix`.
+    mu_max_values : np.ndarray
+        Values of mu_max to scan.
+    base_path : str
+        If provided, saves the figure.
+    xlim : tuple of float, optional
+        Limits for the x-axis of the plot.
+    ylim : tuple of float, optional
+        Limits for the y-axis of the plot.
+    delta_mu : float
+        Width of mu bins. Default is `0.01`.
 
-        mask = (s_array == s) & (mu_array >= 0) & (mu_array <= mu_max)
+    Returns
+    -------
+    None
+    """
 
-        xi_vals = xi_array[mask]
+    n_files = xi_matrix.shape[0]
+    s_unique = np.unique(s_matrix[0])
+    n_s = len(s_unique)
+    n_muMax = len(mu_max_values)
 
-        xi_muMax[i] = np.sum(xi_vals) * delta_mu / mu_max
+    Xi_all = np.zeros((n_files, n_muMax, n_s))
 
+    for f in range(n_files):
+        s_array  = s_matrix[f]
+        mu_array = mu_matrix[f]
+        xi_array = xi_matrix[f]
 
-    plt.figure(figsize=(8, 8), num=f"mu_max = {mu_max}")
+        for i, mu_max in enumerate(mu_max_values):
+            for j, s in enumerate(s_unique):
+                mask = (s_array == s) & (mu_array >= 0.0) & (mu_array <= mu_max)
 
-    plt.plot(s_unique, (s_unique**2) * xi_muMax,
-             label=fr"$\xi_{{[0,{mu_max}]}}$",
-             linestyle='--', linewidth=0.6, marker='o', markersize=2)
+                Xi_all[f, i, j] = (
+                    np.sum(xi_array[mask]) * delta_mu / mu_max
+                )
 
-    plt.title(fr"Scale dependance, $\mu_\mathrm{{max}} = {mu_max}$")
+    Xi_mean = np.mean(Xi_all, axis=0)
+    Xi_std  = np.std(Xi_all, axis=0)
+
+    plt.figure(figsize=(8, 8), num="Mu max")
+
+    for i, mu_max in enumerate(mu_max_values):
+        plt.errorbar(
+            s_unique,
+            (s_unique**2) * Xi_mean[i],
+            yerr= (s_unique**2) * Xi_std[i],
+            linestyle='--',
+            linewidth=1.0,
+            marker='o',
+            markersize=3,
+            capsize=1,
+            elinewidth=0.6,
+            label=fr"$\xi_{{[0,{mu_max}]}}$"
+        )
 
     plt.xlabel(r'$s \,[h^{-1} \, \mathrm{Mpc}]$')
-    plt.ylabel(fr'$s^2 \xi_{{[0,{mu_max}]}} \,[h^{{-2}} \, \mathrm{{Mpc}}^2]$')
+    plt.ylabel(fr'$s^2 \xi \,[h^{{-2}} \, \mathrm{{Mpc}}^2]$')
+    plt.title("Scale dependance")
 
     if xlim is not None:
         plt.xlim(xlim)
@@ -938,9 +909,117 @@ def compute_muMax(s_array: npt.NDArray[np.float64],
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
 
-    # plt.savefig(f"{base_path}/muMax_{mu_max}.pdf", dpi=600)
+    plt.savefig(f"{base_path}/muMax.pdf", dpi=600)
 
-    return xi_muMax
+
+def compute_muMax_ratio(s_matrix: npt.NDArray[np.float64],
+                        mu_matrix: npt.NDArray[np.float64],
+                        xi_matrix_measured: npt.NDArray[np.float64],
+                        xi_matrix_correct: npt.NDArray[np.float64],
+                        mu_max_values: npt.NDArray[np.float32],
+                        base_path: str,
+                        xlim: Optional[Tuple[float, float]] = None,
+                        ylim: Optional[Tuple[float, float]] = None,
+                        delta_mu: float = 0.01
+) -> None:
+    """
+    Computes and plots the ratio between measured and correct of normalized cumulative μ-integrated correlation:
+        Xi(s; mu_max) = (1 / mu_max) ∫_0^{mu_max} xi(s,mu) dmu
+
+    for several values of mu_max using multiple realizations to estimate errors.
+
+    Parameters
+    ----------
+    s_matrix : np.ndarray
+        Matrix of separation values.
+        Shaped `(n_files, n_elements)`.
+    mu_matrix : np.ndarray
+        Matrix of mu values.
+        Same shape as `s_matrix`.
+    xi_matrix_measured : np.ndarray
+        Matrix of measured 2-point correlation function data.
+        Same shape as `s_matrix`.
+    xi_matrix_correct : np.ndarray
+        Matrix of correct 2-point correlation function data.
+        Same shape as `s_matrix`.
+    mu_max_values : np.ndarray
+        Values of mu_max to scan.
+    base_path : str
+        If provided, saves the figure.
+    xlim : tuple of float, optional
+        Limits for the x-axis of the plot.
+    ylim : tuple of float, optional
+        Limits for the y-axis of the plot.
+    delta_mu : float
+        Width of mu bins. Default is `0.01`.
+
+    Returns
+    -------
+    None
+    """
+
+    n_files = xi_matrix_measured.shape[0]
+    s_unique = np.unique(s_matrix[0])
+    n_s = len(s_unique)
+    n_muMax = len(mu_max_values)
+
+    Xi_all_measured = np.zeros((n_files, n_muMax, n_s))
+    Xi_all_correct = np.zeros((n_files, n_muMax, n_s))
+    Xi_all_ratio = np.zeros((n_files, n_muMax, n_s))
+
+    for f in range(n_files):
+        s_array  = s_matrix[f]
+        mu_array = mu_matrix[f]
+        xi_array_measured = xi_matrix_measured[f]
+        xi_array_correct = xi_matrix_correct[f]
+
+        for i, mu_max in enumerate(mu_max_values):
+            for j, s in enumerate(s_unique):
+                mask = (s_array == s) & (mu_array >= 0.0) & (mu_array <= mu_max)
+
+                Xi_all_measured[f, i, j] = (
+                    np.sum(xi_array_measured[mask]) * delta_mu / mu_max
+                )
+                Xi_all_correct[f, i, j] = (
+                    np.sum(xi_array_correct[mask]) * delta_mu / mu_max
+                )
+
+    Xi_all_ratio = Xi_all_measured / Xi_all_correct
+
+    Xi_mean_ratio = np.mean(Xi_all_ratio, axis=0)
+    Xi_std_ratio  = np.std(Xi_all_ratio, axis=0)
+
+    plt.figure(figsize=(8, 8), num="Mu max ratio")
+
+    for i, mu_max in enumerate(mu_max_values):
+        plt.errorbar(
+            s_unique,
+            Xi_mean_ratio[i],
+            yerr=Xi_std_ratio[i],
+            linestyle='--',
+            linewidth=1.0,
+            marker='o',
+            markersize=3,
+            capsize=1,
+            elinewidth=0.6,
+            label=fr"$\frac{{\xi^\mathrm{{measured}}}}{{\xi^\mathrm{{correct}}}}([0,{mu_max}])$"
+        )
+
+    plt.xlabel(r'$s \,[h^{-1} \, \mathrm{Mpc}]$')
+    plt.ylabel(fr'$\frac{{\xi^\mathrm{{measured}}}}{{\xi^\mathrm{{correct}}}}$')
+    plt.title("Scale dependance")
+
+    if xlim is not None:
+        plt.xlim(xlim)
+
+    if ylim is not None:
+        plt.ylim(ylim)
+
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+    plt.tight_layout()
+
+    plt.savefig(f"{base_path}/muMax_ratio.pdf", dpi=600)
 
 
 # ================================================================================================================================= #
@@ -1025,19 +1104,12 @@ def plot_projectedFunction(rp_unique: npt.NDArray[np.float64],
 
     plt.figure(figsize=(8, 8), num="Projected function")
 
-    y = (rp_unique**2) * wp
-    
-    if err_wp is not None:
-        err_y = (rp_unique**2) * err_wp
-    else:
-        err_y = None
-
-    plt.errorbar(rp_unique, y, yerr=err_y, label=label, linestyle='--', linewidth=0.6, marker='o', markersize=2, capsize=2)
+    plt.errorbar(rp_unique, wp, yerr=err_wp, label=label, linestyle='--', linewidth=1.0, marker='o', markersize=3, capsize=1, elinewidth=0.6)
 
     plt.title(f"Projected function")
     
     plt.xlabel(r'$r_\mathrm{p} \,[h^{-1} \, \mathrm{Mpc}]$')
-    plt.ylabel(r'$r_\mathrm{p}^2 w_\mathrm{p} \,[h^{-2} \, \mathrm{Mpc}^2]$')
+    plt.ylabel(r'$w_\mathrm{p}$')
 
     if xlim is not None:
         plt.xlim(xlim)
@@ -1100,26 +1172,13 @@ def plot_projectedFunction_measVScorr(rp_unique: npt.NDArray[np.float64],
     label_measured = r"$w_\mathrm{p}^\mathrm{measured}$"
     label_correct  = r"$w_\mathrm{p}^\mathrm{correct}$"
 
-    y_measured = (rp_unique**2) * wp_measured
-    y_correct = (rp_unique**2) * wp_correct
-
-    if err_wp_measured is not None:
-        err_y_measured = (rp_unique**2) * err_wp_measured
-    else:
-        err_y_measured = None
-
-    if err_wp_correct is not None:
-        err_y_correct = (rp_unique**2) * err_wp_correct
-    else:
-        err_y_correct = None
-
-    plt.errorbar(rp_unique, y_measured, yerr=err_y_measured, label=label_measured, linestyle='--', linewidth=0.6, marker='o', markersize=2, capsize=2)
-    plt.errorbar(rp_unique, y_correct, yerr=err_y_correct, label=label_correct, linestyle='--', linewidth=0.6, marker='o', markersize=2, capsize=2)
+    plt.errorbar(rp_unique, wp_measured, yerr=err_wp_measured, label=label_measured, linestyle='--', linewidth=1.0, marker='o', markersize=3, capsize=1, elinewidth=0.6)
+    plt.errorbar(rp_unique, wp_correct, yerr=err_wp_correct, label=label_correct, linestyle='--', linewidth=1.0, marker='o', markersize=3, capsize=1, elinewidth=0.6)
 
     plt.title(f"Projected function Measured VS Correct")
     
     plt.xlabel(r'$r_\mathrm{p} \,[h^{-1} \, \mathrm{Mpc}]$')
-    plt.ylabel(r'$r_\mathrm{p}^2 w_\mathrm{p} \,[h^{-2} \, \mathrm{Mpc}^2]$')
+    plt.ylabel(r'$w_\mathrm{p}$')
 
     if xlim is not None:
         plt.xlim(xlim)
@@ -1135,38 +1194,28 @@ def plot_projectedFunction_measVScorr(rp_unique: npt.NDArray[np.float64],
 
 
 def plot_projectedFunction_ratio(rp_unique: npt.NDArray[np.float64],
-                                 wp_measured: npt.NDArray[np.float64],
-                                 wp_correct: npt.NDArray[np.float64],
+                                 wp_ratio: npt.NDArray[np.float64],
                                  base_path: str,
-                                 err_wp_measured: Optional[npt.NDArray[np.float64]] = None,
-                                 err_wp_correct: Optional[npt.NDArray[np.float64]] = None,
+                                 err_wp_ratio: Optional[npt.NDArray[np.float64]] = None,
                                  xlim: Optional[Tuple[float, float]] = None,
                                  ylim: Optional[Tuple[float, float]] = None
-) -> Tuple[
-    npt.NDArray[np.float64],
-    Optional[npt.NDArray[np.float64]]
-]:
+) -> None:
     """
-    Plot the ratio between measured and correct projected function, compute
-    the propagated uncertainties, and save the resulting figure to file.
+    Plot the ratio between measured and correct projected function
+    and save the resulting figure to file.
 
     Parameters
     ----------
     rp_unique : np.ndarray
         Array of unique perpendicular separation values rₚ at which the
         projected function is evaluated.
-    wp_measured : np.ndarray
-        Measured projected function.
-    wp_correct : np.ndarray
-        Correct projected function.
+    wp_ratio : np.ndarray
+        Ratio between measured and correct projected function.
     base_path : str
         Path to the directory in which the output figure will be saved.
-    err_wp_measured : np.ndarray, optional
-        Error estimates for the measured projected funtion. If provided together with
-        `err_wp_correct`, error bars on the ratio are computed.
-    err_wp_correct : np.ndarray, optional
-        Error estimates for the correct projected function, used in the uncertainty
-        propagation of the ratio.
+    err_wp_ratio : np.ndarray, optional
+        Error estimates for the ratio between measured and correct projected funtion.
+        If provided, error bars on the ratio are computed.
     xlim : tuple of float, optional
         Limits for the x-axis of the plot.
     ylim : tuple of float, optional
@@ -1174,53 +1223,17 @@ def plot_projectedFunction_ratio(rp_unique: npt.NDArray[np.float64],
 
     Returns
     -------
-    tuple
-        A pair `(wp_ratio, err_ratio)`, where:
-        - `wp_ratio` is the element-wise ratio between measured and
-          corrected projected function.
-        - `err_ratio` contains the propagated uncertainties of the ratio, or
-          `None` if the error inputs are not provided.
+    None
+        The function plots the ratio between measured and correct projected function,
+        optionally with error bars.
     """
-
-    wp_ratio = np.divide(
-        wp_measured,
-        wp_correct,
-        out=np.full_like(wp_measured, np.nan),
-        where=(wp_correct != 0)
-    )
-
-    if err_wp_measured is not None and err_wp_correct is not None:
-        
-        term1 = np.divide(
-            err_wp_measured, wp_correct,
-            out=np.zeros_like(err_wp_measured),
-            where=(wp_correct != 0)
-        )
-
-        term2 = np.divide(
-            wp_measured * err_wp_correct, wp_correct**2,
-            out=np.zeros_like(err_wp_measured),
-            where=(wp_correct != 0)
-        )
-
-        err_ratio = np.sqrt(term1**2 + term2**2)
-
-    else:
-        err_ratio = None
 
     plt.figure(figsize=(8, 8), num="Ratio Measured VS Correct")
 
     
     label = r"$\frac{w_\mathrm{p}^\mathrm{measured}}{w_\mathrm{p}^\mathrm{correct}}$"
 
-    y = wp_ratio
-        
-    if err_ratio is not None:
-        err_y = err_ratio
-    else:
-        err_y = None
-
-    plt.errorbar(rp_unique, y, yerr=err_y, label=label, linestyle='--', linewidth=0.6, marker='o', markersize=2, capsize=2)    
+    plt.errorbar(rp_unique, wp_ratio, yerr=err_wp_ratio, label=label, linestyle='--', linewidth=1.0, marker='o', markersize=3, capsize=1, elinewidth=0.6)
 
     plt.title(f"Projected function ratio")
 
@@ -1238,8 +1251,6 @@ def plot_projectedFunction_ratio(rp_unique: npt.NDArray[np.float64],
     plt.tight_layout()
 
     plt.savefig(f"{base_path}/projFunc_ratio.pdf", dpi=600)
-
-    return wp_ratio, err_ratio
 
 
 def compute_projectedFunction_BAOpeaks(rp_unique: npt.NDArray[np.float64],
@@ -1367,41 +1378,90 @@ def print_projectedFunction_BAOintervals(rp_peak: float,
     print()
 
 
-def compute_piMax(rp_array: npt.NDArray[np.float64],
-                  pi_array: npt.NDArray[np.float64],
-                  xi_array: npt.NDArray[np.float64],
-                  pi_max: float,
+def compute_piMax(rp_matrix: npt.NDArray[np.float64],
+                  pi_matrix: npt.NDArray[np.float64],
+                  xi_matrix: npt.NDArray[np.float64],
+                  pi_max_values: npt.NDArray[np.float32],
                   base_path: str,
                   xlim: Optional[Tuple[float, float]] = None,
                   ylim: Optional[Tuple[float, float]] = None,
                   delta_pi: float = 1.0
-) -> npt.NDArray[np.float64]:
+) -> None:
+    """
+    Computes and plots the projected correlation function:
+        wₚ(rₚ; π_max) = 2 ∫_0^{π_max} xi(rₚ, π) dπ
 
-    rp_unique = np.unique(rp_array)
-    xi_piMax = np.zeros(len(rp_unique))
+    for several values of π_max using multiple realizations to estimate errors.
 
-    for i, rp in enumerate(rp_unique):
+    Parameters
+    ----------
+    rp_matrix : np.ndarray
+        Matrix of transverse separations rₚ.
+        Shape (n_files, n_elements).
+    pi_matrix : np.ndarray
+        Matrix of line-of-sight separations π.
+        Same shape as rp_matrix.
+    xi_matrix : np.ndarray
+        Matrix of 2-point correlation function values.
+        Same shape as rp_matrix.
+    pi_max_values : np.ndarray
+        Values of π_max to scan.
+    base_path : str
+        Path where the figure is saved.
+    xlim : tuple of float, optional
+        Limits for the x-axis of the plot.
+    ylim : tuple of float, optional
+        Limits for the y-axis of the plot.
+    delta_pi : float
+        Width of π bins.
+    """
 
-        mask = (rp_array == rp) & (pi_array <= pi_max)
+    n_files = xi_matrix.shape[0]
+    rp_unique = np.unique(rp_matrix[0])
+    n_rp = len(rp_unique)
+    n_piMax = len(pi_max_values)
 
-        xi_vals = xi_array[mask]
+    wp_all = np.zeros((n_files, n_piMax, n_rp))
 
-        xi_piMax[i] = np.sum(xi_vals) * delta_pi
+    for f in range(n_files):
+        rp_array = rp_matrix[f]
+        pi_array = pi_matrix[f]
+        xi_array = xi_matrix[f]
 
-    plt.figure(figsize=(8, 8), num=f"pi_max = {pi_max}")
+        for i, pi_max in enumerate(pi_max_values):
+            for j, rp in enumerate(rp_unique):
+                mask = (rp_array == rp) & (pi_array >= 0.0) & (pi_array <= pi_max)
 
-    plt.plot(rp_unique, (rp_unique**2) * xi_piMax,
-             label=fr"$\xi_{{[0,{pi_max}]}}$",
-             linestyle='--', linewidth=0.6, marker='o', markersize=2)
+                wp_all[f, i, j] = (
+                    2.0 * np.sum(xi_array[mask]) * delta_pi
+                )
 
-    plt.title(fr"Scale dependance, $\pi_\mathrm{{max}} = {pi_max}$")
+    wp_mean = np.mean(wp_all, axis=0)
+    wp_std  = np.std(wp_all, axis=0)
+
+    plt.figure(figsize=(8, 8), num="Pi max")
+
+    for i, pi_max in enumerate(pi_max_values):
+        plt.errorbar(
+            rp_unique,
+            (rp_unique**2) * wp_mean[i],
+            yerr= (rp_unique**2) * wp_std[i],
+            linestyle='--',
+            linewidth=1.0,
+            marker='o',
+            markersize=3,
+            capsize=1,
+            elinewidth=0.6,
+            label=fr"$\xi_{{[0,{pi_max}]}}$"
+        )
+
+    plt.title("Scale dependance")
 
     plt.xlabel(r'$r_\mathrm{p} \,[h^{-1} \, \mathrm{Mpc}]$')
-    plt.ylabel(fr'$r_\mathrm{{p}}^2 \xi_{{[0,{pi_max}]}} \,[h^{{-2}} \, \mathrm{{Mpc}}^2]$')
+    plt.ylabel(fr'$r_\mathrm{{p}}^2 w_\mathrm{{p}}$')
 
     if xlim is not None:
         plt.xlim(xlim)
-
     if ylim is not None:
         plt.ylim(ylim)
 
@@ -1409,6 +1469,111 @@ def compute_piMax(rp_array: npt.NDArray[np.float64],
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
 
-    # plt.savefig(f"{base_path}/piMax_{pi_max}.pdf", dpi=600)
+    plt.savefig(f"{base_path}/wp_piMax.pdf", dpi=600)
 
-    return xi_piMax
+
+def compute_piMax_ratio(rp_matrix: npt.NDArray[np.float64],
+                        pi_matrix: npt.NDArray[np.float64],
+                        xi_matrix_measured: npt.NDArray[np.float64],
+                        xi_matrix_correct: npt.NDArray[np.float64],
+                        pi_max_values: npt.NDArray[np.float32],
+                        base_path: str,
+                        xlim: Optional[Tuple[float, float]] = None,
+                        ylim: Optional[Tuple[float, float]] = None,
+                        delta_pi: float = 1.0
+) -> None:
+    """
+    Computes and plots the projected ratio between measured and correct of correlation function:
+        wₚ(rₚ; π_max) = 2 ∫_0^{π_max} xi(rₚ, π) dπ
+
+    for several values of π_max using multiple realizations to estimate errors.
+
+    Parameters
+    ----------
+    rp_matrix : np.ndarray
+        Matrix of transverse separations rₚ.
+        Shape (n_files, n_elements).
+    pi_matrix : np.ndarray
+        Matrix of line-of-sight separations π.
+        Same shape as rp_matrix.
+    xi_matrix_measured : np.ndarray
+        Matrix of measured 2-point correlation function values.
+        Same shape as rp_matrix.
+    xi_matrix_correct : np.ndarray
+        Matrix of correct 2-point correlation function values.
+        Same shape as rp_matrix.
+    pi_max_values : np.ndarray
+        Values of π_max to scan.
+    base_path : str
+        Path where the figure is saved.
+    xlim : tuple of float, optional
+        Limits for the x-axis of the plot.
+    ylim : tuple of float, optional
+        Limits for the y-axis of the plot.
+    delta_pi : float
+        Width of π bins.
+    """
+
+    n_files = xi_matrix_measured.shape[0]
+    rp_unique = np.unique(rp_matrix[0])
+    n_rp = len(rp_unique)
+    n_piMax = len(pi_max_values)
+
+    wp_all_measured = np.zeros((n_files, n_piMax, n_rp))
+    wp_all_correct = np.zeros((n_files, n_piMax, n_rp))
+    wp_all_ratio = np.zeros((n_files, n_piMax, n_rp))
+
+    for f in range(n_files):
+        rp_array = rp_matrix[f]
+        pi_array = pi_matrix[f]
+        xi_array_measured = xi_matrix_measured[f]
+        xi_array_correct = xi_matrix_correct[f]
+
+        for i, pi_max in enumerate(pi_max_values):
+            for j, rp in enumerate(rp_unique):
+                mask = (rp_array == rp) & (pi_array >= 0.0) & (pi_array <= pi_max)
+
+                wp_all_measured[f, i, j] = (
+                    2.0 * np.sum(xi_array_measured[mask]) * delta_pi
+                )
+                
+                wp_all_correct[f, i, j] = (
+                    2.0 * np.sum(xi_array_correct[mask]) * delta_pi
+                )
+
+    wp_all_ratio = wp_all_measured / wp_all_correct
+
+    wp_mean_ratio = np.mean(wp_all_ratio, axis=0)
+    wp_std_ratio = np.std(wp_all_ratio, axis=0)
+
+    plt.figure(figsize=(8, 8), num="Pi max ratio")
+
+    for i, pi_max in enumerate(pi_max_values):
+        plt.errorbar(
+            rp_unique,
+            wp_mean_ratio[i],
+            yerr=wp_std_ratio[i],
+            linestyle='--',
+            linewidth=1.0,
+            marker='o',
+            markersize=3,
+            capsize=1,
+            elinewidth=0.6,
+            label=fr"$\frac{{w_\mathrm{{p}}^\mathrm{{measured}}}}{{w_\mathrm{{p}}^\mathrm{{correct}}}}([0,{pi_max}])$"
+        )
+
+    plt.title("Scale dependance")
+
+    plt.xlabel(r'$r_\mathrm{p} \,[h^{-1} \, \mathrm{Mpc}]$')
+    plt.ylabel(fr'$\frac{{w_\mathrm{{p}}^\mathrm{{measured}}}}{{w_{{p}}^\mathrm{{correct}}}}$')
+
+    if xlim is not None:
+        plt.xlim(xlim)
+    if ylim is not None:
+        plt.ylim(ylim)
+
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+    plt.tight_layout()
+
+    plt.savefig(f"{base_path}/wp_piMax_ratio.pdf", dpi=600)
