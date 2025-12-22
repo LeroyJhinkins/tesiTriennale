@@ -36,6 +36,14 @@ rp_matrix_corr, pi_matrix_corr, dd_matrix_corr, dr_matrix_corr, rr_matrix_corr, 
         kind="correct"
     )
 
+# this is for the errors: std computes the error of the single measure,
+# but, we when we do more realisations, we actually need to compute the error of the mean = error / sqrt(nFiles)
+sigmaMean = True
+if sigmaMean:
+    normaliz = 1.0 / np.sqrt(nFiles)
+else:
+    normaliz = 1.0
+
 
 # rebinning and compute 2PCF ------------------------------------------------------------------------------------------------------
 # we want to reduce noise and we don't need to have the fine binning we have (200 bins in both rp and pi)
@@ -189,6 +197,9 @@ bm.plot_imshow_ratio(
     z_max= 2.1
 )
 
+plt.show()
+plt.close('all')
+
 
 # projected function --------------------------------------------------------------------------------------------------------------
 print("\n===== Calculating projected function =====")
@@ -197,10 +208,6 @@ rp_unique_reb = np.unique(rpMean_array_meas_reb)
 
 # we need to compute projected function, but we dont do projFunc(mean)
 # we do mean(projFunc) to have an accurate estimate of the projFunc
-# not rebinned ones
-
-
-# rebinned ones
 wp_measured_all_reb = []
 wp_correct_all_reb = []
 wp_ratio_all_reb = []
@@ -222,15 +229,15 @@ for i in range(nFiles):
 
 wp_measured_all_reb = np.array(wp_measured_all_reb) # shape = (1000, n_rp_unique)
 wpMean_measured_reb = wp_measured_all_reb.mean(axis=0)
-wpStd_measured_reb = wp_measured_all_reb.std(axis=0, ddof=1)
+wpStd_measured_reb = wp_measured_all_reb.std(axis=0, ddof=1) * normaliz
 
 wp_correct_all_reb = np.array(wp_correct_all_reb) # shape = (1000, n_rp_unique)
 wpMean_correct_reb = wp_correct_all_reb.mean(axis=0)
-wpStd_correct_reb = wp_correct_all_reb.std(axis=0, ddof=1)
+wpStd_correct_reb = wp_correct_all_reb.std(axis=0, ddof=1) * normaliz
 
 wp_ratio_all_reb = np.array(wp_ratio_all_reb) # shape = (1000, n_rp_unique)
 wpMean_ratio_reb = wp_ratio_all_reb.mean(axis=0) # we did it like this because mean(ratio) != ratio(mean)
-wpStd_ratio_reb = wp_ratio_all_reb.std(axis=0, ddof=1) # and we want to be the most accurate possible => we need mean(ratio)
+wpStd_ratio_reb = wp_ratio_all_reb.std(axis=0, ddof=1) * normaliz # and we want to be the most accurate possible => we need mean(ratio)
 
 # covariance matrices
 wpCov_measured_reb = np.cov(wp_measured_all_reb, rowvar=False) # shape = (n_rp_unique, n_rp_unique)

@@ -559,6 +559,8 @@ def plot_covarianceMatrix(coords: str,
                           kind: str,
                           fig: str,
                           filename: str,
+                          l_values: Optional[npt.NDArray[np.int8]] = None,
+                          n_wedges: Optional[int] = None,
                           xlim: Optional[Tuple[float, float]] = None,
                           ylim: Optional[Tuple[float, float]] = None,
                           v_min: Optional[float] = None,
@@ -582,7 +584,7 @@ def plot_covarianceMatrix(coords: str,
         Path to the directory in which the output figure will be saved.
     kind : str
         Type of correlation map to plot. Must be either `"measured"`,
-        `"correct"` or `"ratio"`. Used for labeling the plot.
+        `"correct"`. Used for labeling the plot.
     fig : str
         `num` value to feed `plt.figure`.
     filename : str
@@ -606,6 +608,9 @@ def plot_covarianceMatrix(coords: str,
         The functon plots the covariance matrix.
     """
 
+    if l_values is not None and n_wedges is not None:
+        raise ValueError("Please provide either 'l_values' OR 'n_wedges', not both.")
+
     # check for coords to be either "SMU" or "RpPI"
     valid_coords = ["SMU", "RpPI"]
     if coords == "SMU":
@@ -624,17 +629,23 @@ def plot_covarianceMatrix(coords: str,
     if kind not in valid_kinds:
         raise ValueError(f"kind must be one of {valid_kinds}, got '{kind}'")
 
-    # this is for the imshow to have physical coordinate axes instead of pixels
-    extent = [
-        scale.min(), scale.max(),
-        scale.min(), scale.max()
-    ]
+    # finding where the scale resets (or decreases), indicating a new block
+    # diff < 0 means the scale went from high -> low (start of new multipole/wedge)
+    n_bins = len(scale)
+    boundaries = np.where(np.diff(scale) < 0)[0] + 1
+    boundaries = np.concatenate(([0], boundaries, [n_bins]))
+    n_blocks = len(boundaries) - 1
 
-    plt.figure(figsize=(9, 8), num=fig + " " + kind)
+    # check for mismatches
+    if n_wedges is not None and n_blocks != n_wedges:
+        raise ValueError(f"Warning: n_wedges={n_wedges} passed, but detected {n_blocks} blocks in the data.")
+    if l_values is not None and n_blocks != len(l_values):
+        raise ValueError(f"Warning: {len(l_values)} l_values passed, but detected {n_blocks} blocks in the data.")
+
+    fig_obj, ax = plt.subplots(figsize=(9, 8), num=fig + " " + kind)
 
     img = plt.imshow(cov,
                      origin="lower",
-                     extent=extent, # type: ignore
                      cmap="RdBu_r",
                      aspect="equal",
                      vmin=v_min,
@@ -643,14 +654,78 @@ def plot_covarianceMatrix(coords: str,
 
     cbar = plt.colorbar(img, label=fr'$C^\mathrm{{{kind}}}$')
 
-    if xlim is not None:
-        plt.xlim(xlim)
-    if ylim is not None:
-        plt.ylim(ylim)
+    first_block_scale = scale[boundaries[0]:boundaries[1]]    
+    desired_ticks = np.linspace(first_block_scale.min(), first_block_scale.max(), 6)[1:-1]
 
-    plt.xlabel(x_label)
-    plt.ylabel(y_label)
-    plt.title(fig + " " + kind)
+    # find the matrix indices corresponding to these physical values
+    tick_indices = []
+    tick_labels = []
+    block_centers = []
+    block_labels = []
+
+    # iterate over each multipole block to place ticks
+    for i in range(n_blocks):
+        start = boundaries[i]
+        end = boundaries[i+1]
+        
+        # get scale for this block
+        block_scale = scale[start:end]
+        
+        # interpolate to find pixel index for each desired physical value
+        # indices are 0..(end-start), mapped to block_scale values
+        idxs = np.interp(desired_ticks, block_scale, np.arange(len(block_scale)))
+        
+        # add the offset of the block start
+        tick_indices.extend(idxs + start)
+        
+        # add ticks
+        tick_labels.extend([f"{t:.1f}" for t in desired_ticks])
+        
+        # draw separator lines
+        if end < n_bins:
+            plt.axhline(end - 0.5, color='black', linestyle='-', linewidth=1)
+            plt.axvline(end - 0.5, color='black', linestyle='-', linewidth=1)
+
+        block_centers.append((start + end - 1) / 2.0)
+        if l_values is not None:
+            block_labels.append(fr"$\ell={l_values[i]}$")
+
+        elif n_wedges is not None:
+            mu_step = 1.0 / n_wedges
+            mu_low = i * mu_step
+            mu_high = (i + 1) * mu_step
+            block_labels.append(fr"$[{mu_low:.2f}, {mu_high:.2f}]$")
+
+    # primary axes (scale)
+    ax.set_xticks(tick_indices)
+    ax.set_yticks(tick_indices)
+    ax.set_xticklabels(tick_labels)
+    ax.set_yticklabels(tick_labels)
+
+    ax.tick_params(axis='both', which='major', labelsize=8)
+    
+    # secondary axes (multipole/wedge labels)
+    # we use secondary axes to place labels at the top and right
+    ax_top = ax.secondary_xaxis('top')
+    ax_right = ax.secondary_yaxis('right')
+    
+    ax_top.set_xticks(block_centers)
+    ax_top.set_xticklabels(block_labels, fontsize=12, fontweight='bold')
+    ax_right.set_yticks(block_centers)
+    ax_right.set_yticklabels(block_labels, fontsize=12, fontweight='bold', rotation=270, va='center')
+
+    # clean up secondary ticks (hide the little tick marks, keep labels)
+    ax_top.tick_params(axis='x', which='both', length=0)
+    ax_right.tick_params(axis='y', which='both', length=0)
+
+    if xlim is not None:
+        ax.set_xlim(xlim)
+    if ylim is not None:
+        ax.set_ylim(ylim)
+
+    ax.set_xlabel(x_label)
+    ax.set_ylabel(y_label)
+    ax.set_title(fig + " " + kind)
     plt.tight_layout()
     plt.savefig(f"{base_path}/{filename}.pdf", dpi=600)
 
@@ -662,6 +737,8 @@ def plot_correlationMatrix(coords: str,
                            kind: str,
                            fig: str,
                            filename: str,
+                           l_values: Optional[npt.NDArray[np.int8]] = None,
+                           n_wedges: Optional[int] = None,
                            xlim: Optional[Tuple[float, float]] = None,
                            ylim: Optional[Tuple[float, float]] = None,
                            v_min: float = -1.0,
@@ -685,7 +762,7 @@ def plot_correlationMatrix(coords: str,
         Path to the directory in which the output figure will be saved.
     kind : str
         Type of correlation map to plot. Must be either `"measured"`,
-        `"correct"` or `"ratio"`. Used for labeling the plot.
+        `"correct"`. Used for labeling the plot.
     fig : str
         `num` value to feed `plt.figure`.
     filename : str
@@ -709,7 +786,10 @@ def plot_correlationMatrix(coords: str,
     None
         The functon computes and plots the correlation matrix.
     """
-    
+
+    if l_values is not None and n_wedges is not None:
+        raise ValueError("Please provide either 'l_values' OR 'n_wedges', not both.")
+
     # covariance to correlation matrix
     std = np.sqrt(np.diag(cov))
     outer_v = np.outer(std, std)
@@ -732,33 +812,103 @@ def plot_correlationMatrix(coords: str,
     valid_kinds = ["measured", "correct"]
     if kind not in valid_kinds:
         raise ValueError(f"kind must be one of {valid_kinds}, got '{kind}'")
+    
+    # finding where the scale resets (or decreases), indicating a new block
+    # diff < 0 means the scale went from high -> low (start of new multipole/wedge)
+    n_bins = len(scale)
+    boundaries = np.where(np.diff(scale) < 0)[0] + 1
+    boundaries = np.concatenate(([0], boundaries, [n_bins]))
+    n_blocks = len(boundaries) - 1
 
-    # this is for the imshow to have physical coordinate axes instead of pixels
-    extent = [
-        scale.min(), scale.max(),
-        scale.min(), scale.max()
-    ]
+    # check for mismatches
+    if n_wedges is not None and n_blocks != n_wedges:
+        raise ValueError(f"Warning: n_wedges={n_wedges} passed, but detected {n_blocks} blocks in the data.")
+    if l_values is not None and n_blocks != len(l_values):
+        raise ValueError(f"Warning: {len(l_values)} l_values passed, but detected {n_blocks} blocks in the data.")
 
-    plt.figure(figsize=(9, 8), num=fig + " " + kind)
+    fig_obj, ax = plt.subplots(figsize=(9, 8), num=fig + " " + kind)
 
     img = plt.imshow(corr,
                      origin="lower",
-                     extent=extent, # type: ignore
                      cmap="RdBu_r",
                      aspect="equal",
                      vmin=v_min,
                      vmax=v_max,
                      interpolation=interp)
 
-    cbar = plt.colorbar(img, label=fr'$R^\mathrm{{{kind}}}$')
+    cbar = plt.colorbar(img, label=fr'$R^\mathrm{{{kind}}}$', ax= ax)
+
+    first_block_scale = scale[boundaries[0]:boundaries[1]]    
+    desired_ticks = np.linspace(first_block_scale.min(), first_block_scale.max(), 6)[1:-1]
+
+    # find the matrix indices corresponding to these physical values
+    tick_indices = []
+    tick_labels = []
+    block_centers = []
+    block_labels = []
+
+    # iterate over each multipole block to place ticks
+    for i in range(n_blocks):
+        start = boundaries[i]
+        end = boundaries[i+1]
+        
+        # get scale for this block
+        block_scale = scale[start:end]
+        
+        # interpolate to find pixel index for each desired physical value
+        # indices are 0..(end-start), mapped to block_scale values
+        idxs = np.interp(desired_ticks, block_scale, np.arange(len(block_scale)))
+        
+        # add the offset of the block start
+        tick_indices.extend(idxs + start)
+        
+        # add ticks
+        tick_labels.extend([f"{t:.1f}" for t in desired_ticks])
+        
+        # draw separator lines
+        if end < n_bins:
+            plt.axhline(end - 0.5, color='black', linestyle='-', linewidth=1)
+            plt.axvline(end - 0.5, color='black', linestyle='-', linewidth=1)
+
+        block_centers.append((start + end - 1) / 2.0)
+        if l_values is not None:
+            block_labels.append(fr"$\ell={l_values[i]}$")
+
+        elif n_wedges is not None:
+            mu_step = 1.0 / n_wedges
+            mu_low = i * mu_step
+            mu_high = (i + 1) * mu_step
+            block_labels.append(fr"$[{mu_low:.2f}, {mu_high:.2f}]$")
+
+    # primary axes (scale)
+    ax.set_xticks(tick_indices)
+    ax.set_yticks(tick_indices)
+    ax.set_xticklabels(tick_labels)
+    ax.set_yticklabels(tick_labels)
+
+    ax.tick_params(axis='both', which='major', labelsize=8)
+    
+    # secondary axes (multipole/wedge labels)
+    # we use secondary axes to place labels at the top and right
+    ax_top = ax.secondary_xaxis('top')
+    ax_right = ax.secondary_yaxis('right')
+    
+    ax_top.set_xticks(block_centers)
+    ax_top.set_xticklabels(block_labels, fontsize=12, fontweight='bold')
+    ax_right.set_yticks(block_centers)
+    ax_right.set_yticklabels(block_labels, fontsize=12, fontweight='bold', rotation=270, va='center')
+
+    # clean up secondary ticks (hide the little tick marks, keep labels)
+    ax_top.tick_params(axis='x', which='both', length=0)
+    ax_right.tick_params(axis='y', which='both', length=0)
 
     if xlim is not None:
-        plt.xlim(xlim)
+        ax.set_xlim(xlim)
     if ylim is not None:
-        plt.ylim(ylim)
+        ax.set_ylim(ylim)
 
-    plt.xlabel(x_label)
-    plt.ylabel(y_label)
-    plt.title(fig + " " + kind)
+    ax.set_xlabel(x_label)
+    ax.set_ylabel(y_label)
+    ax.set_title(fig + " " + kind)
     plt.tight_layout()
     plt.savefig(f"{base_path}/{filename}.pdf", dpi=600)

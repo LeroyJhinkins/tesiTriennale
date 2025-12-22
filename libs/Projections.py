@@ -124,30 +124,31 @@ def print_multipoles(l_values: npt.NDArray[np.float64],
         print(f"  {s:.1f} {xi_str}")
 
 
-def plot_multipole(l_value: int,
-                   s_unique: npt.NDArray[np.float64],
-                   multipole: npt.NDArray[np.float64],
-                   base_path: str,
-                   err_multipole: Optional[npt.NDArray[np.float64]] = None,
-                   xlim: Optional[Tuple[float, float]] = None,
-                   ylim: Optional[Tuple[float, float]] = None
+def plot_multipoles(l_values: npt.NDArray[np.int8],
+                    s_unique: npt.NDArray[np.float64],
+                    multipoles: npt.NDArray[np.float64],
+                    base_path: str,
+                    err_multipoles: Optional[npt.NDArray[np.float64]] = None,
+                    xlim: Optional[Tuple[float, float]] = None,
+                    ylim: Optional[Tuple[float, float]] = None
 ) -> None:
     """
-    Plot a single multipole of the correlation function as a function of
+    Plot multipoles of the correlation function as a function of
     separation s, optionally including error bars, and save the figure to file.
 
     Parameters
     ----------
-    l_value : int
-        Multipole order ℓ corresponding to the `multipole` values.
+    l_values : int
+        Array of multipole orders ℓ corresponding to the columns of
+        `multipoles`.
     s_unique : np.ndarray
-        Array of unique separation values s at which the multipole is evaluated.
-    multipole : np.ndarray
-        Array containing the multipole values for each separation in `s_unique`.
+        Array of unique separation values s at which the multipoles is evaluated.
+    multipoles : np.ndarray
+        Array containing the multipoles' values for each separation in `s_unique`.
     base_path : str
         Path to the directory in which the output figure will be saved.
-    err_multipole : np.ndarray, optional
-        Error estimates associated with the multipole values. If provided,
+    err_multipoles : np.ndarray, optional
+        Error estimates associated with the multipoles' values. If provided,
         error bars are included in the plot.
     xlim : tuple of float, optional
         Limits for the x-axis of the plot.
@@ -157,27 +158,29 @@ def plot_multipole(l_value: int,
     Returns
     -------
     None
-        The function generates and saves a plot named `multipole{l_value}.pdf`
+        The function generates and saves a plot named `multipoles.pdf`
         in the specified directory.
     """
 
     plt.figure(figsize=(8, 8), num="Multipole plot")
 
-    label = fr"$\xi_{l_value}$"
+    for j, l in enumerate(l_values):
 
-    y = (s_unique**2) * multipole
-    
-    if err_multipole is not None:
-            err_y = (s_unique**2) * err_multipole
-    else:
-        err_y = None
+        label = fr"$\xi_{l}$"
+        
+        y = s_unique**2 * multipoles[:, j]
 
-    plt.errorbar(s_unique, y, yerr=err_y, label=label, linestyle='--', linewidth=0.9, marker='o', markersize=3, capsize=1, elinewidth=0.6)
+        if err_multipoles is not None:
+            err_y = s_unique**2 * err_multipoles[:, j]
+        else:
+            err_y = None
 
-    plt.title(fr"Multipole $l={l_value}$")
+        plt.errorbar(s_unique, y, yerr=err_y, label=label, linestyle="--", linewidth=0.9, marker="o", markersize=3, capsize=1, elinewidth=0.6)
+
+    plt.title("Multipoles")
     
     plt.xlabel(r'$s \,[h^{-1} \, \mathrm{Mpc}]$')
-    plt.ylabel(fr'$s^2 \xi_{l_value} \,[h^{{-2}} \, \mathrm{{Mpc}}^2]$')
+    plt.ylabel(fr'$s^2 \xi_\ell \,[h^{{-2}} \, \mathrm{{Mpc}}^2]$')
 
     if xlim is not None:
         plt.xlim(xlim)
@@ -189,18 +192,114 @@ def plot_multipole(l_value: int,
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
     
-    plt.savefig(f"{base_path}/multipole{l_value}.pdf", dpi=600)
+    plt.savefig(f"{base_path}/multipoles.pdf", dpi=600)
 
 
-def plot_multipole_measVScorr(l_value: int,
-                              s_unique: npt.NDArray[np.float64],
-                              multipole_measured: npt.NDArray[np.float64],
-                              multipole_correct: npt.NDArray[np.float64],
-                              base_path: str,
-                              err_multipole_measured: Optional[npt.NDArray[np.float64]] = None,
-                              err_multipole_correct: Optional[npt.NDArray[np.float64]] = None,
-                              xlim: Optional[Tuple[float, float]] = None,
-                              ylim: Optional[Tuple[float, float]] = None
+def plot_multipoles_rebinVSnot(l_values: npt.NDArray[np.int8],
+                               s_unique: npt.NDArray[np.float64],
+                               s_unique_rebin: npt.NDArray[np.float64],
+                               multipoles: npt.NDArray[np.float64],
+                               multipoles_rebin: npt.NDArray[np.float64],
+                               base_path: str,
+                               err_multipoles: Optional[npt.NDArray[np.float64]] = None,
+                               err_multipoles_rebin: Optional[npt.NDArray[np.float64]] = None,
+                               xlim: Optional[Tuple[float, float]] = None,
+                               ylim: Optional[Tuple[float, float]] = None
+) -> None:
+    """
+    Plot both rebinned and not rebinned version of the given multipoles of the
+    correlation function as a function of separation s, optionally including
+    error bars, and save the figure to file.
+
+    Parameters
+    ----------
+    l_values : int
+        Array of multipole orders ℓ corresponding to the columns of
+        `multipoles`.
+    s_unique : np.ndarray
+        Array of unique separation values s at which the not rebinned multipoles is evaluated.
+    s_unique_rebin : np.ndarray
+        Array of unique separation values s at which the rebinned multipoles is evaluated.
+    multipoles : np.ndarray
+        Array containing the multipoles' values for each separation in `s_unique`.
+    multipoles_rebin : np.ndarray
+        Array containing the rebinned multipoles' values for each separation in `s_unique`.
+    base_path : str
+        Path to the directory in which the output figure will be saved.
+    err_multipoles : np.ndarray, optional
+        Error estimates associated with the not rebinned multipoles' values. If provided,
+        error bars are included in the plot.
+    err_multipoles_rebin : np.ndarray, optional
+        Error estimates associated with the rebinned multipoles' values. If provided,
+        error bars are included in the plot.
+    xlim : tuple of float, optional
+        Limits for the x-axis of the plot.
+    ylim : tuple of float, optional
+        Limits for the y-axis of the plot.
+
+    Returns
+    -------
+    None
+        The function generates and saves a plot named `multipoles.pdf`
+        in the specified directory.
+
+    Notes
+    -----
+    This function has the only scope to plot the rebinned version over the non rebinned one
+    just to make sure that the rebinning works. No more function like will be defined, since
+    one check is more than fine.
+    """
+
+    plt.figure(figsize=(8, 8), num="Multipole plot Rebin VS Not")
+
+    for j, l in enumerate(l_values):
+
+        label = fr"$\xi_{l}$"
+        label_rebin = fr"$\xi_{l}^\mathrm{{rebin}}$"
+        
+        y = (s_unique**2) * multipoles[:,j]
+        y_rebin = (s_unique_rebin**2) * multipoles_rebin[:,j]
+    
+        if err_multipoles is not None:
+            err_y = (s_unique**2) * err_multipoles[:,j]
+        else:
+            err_y = None
+    
+        if err_multipoles_rebin is not None:
+            err_y_rebin = (s_unique_rebin**2) * err_multipoles_rebin[:,j]
+        else:
+            err_y_rebin = None
+
+        plt.errorbar(s_unique, y, yerr=err_y, label=label, linestyle='--', linewidth=0.9, marker='o', markersize=3, capsize=1, elinewidth=0.6)
+        plt.errorbar(s_unique_rebin, y_rebin, yerr=err_y_rebin, label=label_rebin, linestyle='--', linewidth=0.9, marker='o', markersize=3, capsize=1, elinewidth=0.6)
+
+    plt.title("Multipoles Rebin VS Not rebin")
+    
+    plt.xlabel(r'$s \,[h^{-1} \, \mathrm{Mpc}]$')
+    plt.ylabel(fr'$s^2 \xi_\ell \,[h^{{-2}} \, \mathrm{{Mpc}}^2]$')
+
+    if xlim is not None:
+        plt.xlim(xlim)
+
+    if ylim is not None:
+        plt.ylim(ylim)
+
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+    plt.tight_layout()
+    
+    plt.savefig(f"{base_path}/multipoles_rebinVSnot.pdf", dpi=600)
+
+
+def plot_multipoles_measVScorr(l_values: npt.NDArray[np.int8],
+                               s_unique: npt.NDArray[np.float64],
+                               multipoles_measured: npt.NDArray[np.float64],
+                               multipoles_correct: npt.NDArray[np.float64],
+                               base_path: str,
+                               err_multipoles_measured: Optional[npt.NDArray[np.float64]] = None,
+                               err_multipoles_correct: Optional[npt.NDArray[np.float64]] = None,
+                               xlim: Optional[Tuple[float, float]] = None,
+                               ylim: Optional[Tuple[float, float]] = None
 ) -> None:
     """
     Plot and compare the measured and corrected multipoles of the correlation
@@ -209,22 +308,26 @@ def plot_multipole_measVScorr(l_value: int,
 
     Parameters
     ----------
-    l_value : int
-        Multipole order ℓ corresponding to the multipole arrays.
+    l_values : int
+        Array of multipole orders ℓ corresponding to the multipole arrays.
     s_unique : np.ndarray
         Array of unique separation values s at which the multipoles are evaluated.
-    multipole_measured : np.ndarray
-        Array containing the measured multipole values for each separation in `s_unique`.
-    multipole_correct : np.ndarray
-        Array containing the corrected multipole values for each separation in `s_unique`.
+    multipoles_measured : np.ndarray
+        Array containing the measured multipoles values for each separation in `s_unique`.
+        Shaped like `(n_s_unique, n_l_values)`.
+    multipoles_correct : np.ndarray
+        Array containing the corrected multipoles values for each separation in `s_unique`.
+        Shaped like `multipoles_measured`.
     base_path : str
         Path to the directory in which the output figure will be saved.
-    err_multipole_measured : np.ndarray, optional
+    err_multipoles_measured : np.ndarray, optional
         Error estimates associated with the measured multipoles. If provided,
         error bars are included in the plot.
-    err_multipole_correct : np.ndarray, optional
+        Shaped like `multipoles_measured`.
+    err_multipoles_correct : np.ndarray, optional
         Error estimates associated with the corrected multipoles. If provided,
         error bars are included in the plot.
+        Shaped like `multipoles_measured`.
     xlim : tuple of float, optional
         Limits for the x-axis of the plot.
     ylim : tuple of float, optional
@@ -234,34 +337,36 @@ def plot_multipole_measVScorr(l_value: int,
     -------
     None
         The function generates and saves a plot named
-        `multipole{l_value}_measVScorr.pdf` in the specified directory.
+        `multipoles_measVScorr.pdf` in the specified directory.
     """
 
-    plt.figure(figsize=(8, 8), num="Multipole plot Measured VS Correct")
+    plt.figure(figsize=(8, 8), num="Multipoles plot Measured VS Correct")
 
-    label_measured = fr"$\xi_{l_value}^{{\mathrm{{measured}}}}$"
-    label_correct = fr"$\xi_{l_value}^{{\mathrm{{correct}}}}$"
+    for j, l in enumerate(l_values):
 
-    y_measured = (s_unique**2) * multipole_measured
-    y_correct = (s_unique**2) * multipole_correct
+        label_measured = fr"$\xi_{l}^{{\mathrm{{measured}}}}$"
+        label_correct = fr"$\xi_{l}^{{\mathrm{{correct}}}}$"
 
-    if err_multipole_measured is not None:
-        err_y_measured = (s_unique**2) * err_multipole_measured
-    else:
-        err_y_measured = None
+        y_measured = (s_unique**2) * multipoles_measured[:,j]
+        y_correct = (s_unique**2) * multipoles_correct[:,j]
 
-    if err_multipole_correct is not None:
-        err_y_correct = (s_unique**2) * err_multipole_correct
-    else:
-        err_y_correct = None
+        if err_multipoles_measured is not None:
+            err_y_measured = (s_unique**2) * err_multipoles_measured[:,j]
+        else:
+            err_y_measured = None
 
-    plt.errorbar(s_unique, y_measured, yerr=err_y_measured, label=label_measured, linestyle='--', linewidth=1.0, marker='o', markersize=3, capsize=1, elinewidth=0.6)
-    plt.errorbar(s_unique, y_correct, yerr=err_y_correct, label=label_correct, linestyle='--', linewidth=1.0, marker='o', markersize=3, capsize=1, elinewidth=0.6)
+        if err_multipoles_correct is not None:
+            err_y_correct = (s_unique**2) * err_multipoles_correct[:,j]
+        else:
+            err_y_correct = None
 
-    plt.title(fr"Multipole $l={l_value}$ Measured VS Correct")
+        plt.errorbar(s_unique, y_measured, yerr=err_y_measured, label=label_measured, linestyle='--', linewidth=1.0, marker='o', markersize=3, capsize=1, elinewidth=0.6)
+        plt.errorbar(s_unique, y_correct, yerr=err_y_correct, label=label_correct, linestyle='--', linewidth=1.0, marker='o', markersize=3, capsize=1, elinewidth=0.6)
+
+    plt.title("Multipoles Measured VS Correct")
     
     plt.xlabel(r'$s \,[h^{-1} \, \mathrm{Mpc}]$')
-    plt.ylabel(fr'$s^2 \xi_{l_value} \,[h^{{-2}} \, \mathrm{{Mpc}}^2]$')
+    plt.ylabel(fr'$s^2 \xi_\ell \,[h^{{-2}} \, \mathrm{{Mpc}}^2]$')
 
     if xlim is not None:
         plt.xlim(xlim)
@@ -273,36 +378,38 @@ def plot_multipole_measVScorr(l_value: int,
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
     
-    plt.savefig(f"{base_path}/multipole{l_value}_measVScorr.pdf", dpi=600)
+    plt.savefig(f"{base_path}/multipoles_measVScorr.pdf", dpi=600)
 
 
-def plot_multipole_ratio(l_value: int,
-                         s_unique: npt.NDArray[np.float64],
-                         multipole_ratio: npt.NDArray[np.float64],
-                         base_path: str,
-                         err_multipole_ratio: Optional[npt.NDArray[np.float64]] = None,
-                         xlim: Optional[Tuple[float, float]] = None,
-                         ylim: Optional[Tuple[float, float]] = None
+def plot_multipoles_ratio(l_values: npt.NDArray[np.int8],
+                          s_unique: npt.NDArray[np.float64],
+                          multipoles_ratio: npt.NDArray[np.float64],
+                          base_path: str,
+                          err_multipoles_ratio: Optional[npt.NDArray[np.float64]] = None,
+                          xlim: Optional[Tuple[float, float]] = None,
+                          ylim: Optional[Tuple[float, float]] = None
 ) -> None:
     """
     Plot the ratio of measured to corrected multipole of the correlation
-    function as a function of separation s, optionally including propagated
+    function as a function of separation s, optionally
     errors, and save the figure to file.
 
     Parameters
     ----------
-    l_value : int
-        Multipole order ℓ corresponding to the multipoles.
+    l_values : int
+        Array of multipole orders ℓ corresponding to the multipole arrays.
     s_unique : np.ndarray
         Array of unique separation values s at which the multipole is evaluated.
-    multipole_ratio : np.ndarray
-        Array of ratio between measured and correct multipole values for each
+    multipoles_ratio : np.ndarray
+        Array of ratio between measured and correct multipoles' values for each
         separation in `s_unique`.
+        Shaped like `(n_s_unique, n_l_values)`.
     base_path : str
         Path to the directory in which the output figure will be saved.
-    err_multipole_correct : np.ndarray, optional
+    err_multipoles_correct : np.ndarray, optional
         Error estimates associated with the ratio between measured and correct multipoles.
         If provided, they are used to add error bars.
+        Shaped like `(n_s_unique, n_l_values)`.
     xlim : tuple of float, optional
         Limits for the x-axis of the plot.
     ylim : tuple of float, optional
@@ -311,20 +418,29 @@ def plot_multipole_ratio(l_value: int,
     Returns
     -------
     None
-        The function plots the ratio between the measured and the correct ℓ-th multipole,
+        The function plots the ratio between the measured and the correct multipole,
         optionally with error bars.
     """
 
     plt.figure(figsize=(8, 8), num="Ratio multipole plot")
 
-    label = fr"$\frac{{\xi_{l_value}^{{\mathrm{{measured}}}}}}{{\xi_{l_value}^{{\mathrm{{correct}}}}}}$"
+    for j, l in enumerate(l_values):
 
-    plt.errorbar(s_unique, multipole_ratio, yerr=err_multipole_ratio, label=label, linestyle='--', linewidth=1.0, marker='o', markersize=3, capsize=1, elinewidth=0.6)
+        label = fr"$\frac{{\xi_{l}^{{\mathrm{{measured}}}}}}{{\xi_{l}^{{\mathrm{{correct}}}}}}$"
 
-    plt.title(fr"Ratio multipole $l={l_value}$")
-    
+        y = multipoles_ratio[:,j]
+
+        if err_multipoles_ratio is not None:
+            err_y = err_multipoles_ratio[:,j]
+        else:
+            err_y = None
+
+        plt.errorbar(s_unique, y, yerr=err_y, label=label, linestyle='--', linewidth=1.0, marker='o', markersize=3, capsize=1, elinewidth=0.6)
+
+    plt.title("Ratio multipoles")
+        
     plt.xlabel(r'$s \,[h^{-1} \, \mathrm{Mpc}]$')
-    plt.ylabel(fr'$\frac{{\xi_{l_value}^{{\mathrm{{measured}}}}}}{{\xi_{l_value}^{{\mathrm{{correct}}}}}}$')
+    plt.ylabel(fr'$\frac{{\xi_\ell^{{\mathrm{{measured}}}}}}{{\xi_\ell^{{\mathrm{{correct}}}}}}$')
 
     if xlim is not None:
         plt.xlim(xlim)
@@ -336,7 +452,7 @@ def plot_multipole_ratio(l_value: int,
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
     
-    plt.savefig(f"{base_path}/multipole{l_value}_ratio.pdf", dpi=600)
+    plt.savefig(f"{base_path}/multipoles_ratio.pdf", dpi=600)
 
 
 # ================================================================================================================================= #
@@ -877,7 +993,7 @@ def compute_muMax(s_matrix: npt.NDArray[np.float64],
                 )
 
     Xi_mean = np.mean(Xi_all, axis=0)
-    Xi_std  = np.std(Xi_all, axis=0)
+    Xi_std  = np.std(Xi_all, axis=0, ddof=1) / np.sqrt(n_files)
 
     plt.figure(figsize=(8, 8), num="Mu max")
 
@@ -987,7 +1103,7 @@ def compute_muMax_ratio(s_matrix: npt.NDArray[np.float64],
     Xi_all_ratio = Xi_all_measured / Xi_all_correct
 
     Xi_mean_ratio = np.mean(Xi_all_ratio, axis=0)
-    Xi_std_ratio  = np.std(Xi_all_ratio, axis=0)
+    Xi_std_ratio  = np.std(Xi_all_ratio, axis=0, ddof=1) / np.sqrt(n_files)
 
     plt.figure(figsize=(8, 8), num="Mu max ratio")
 
@@ -1437,7 +1553,7 @@ def compute_piMax(rp_matrix: npt.NDArray[np.float64],
                 )
 
     wp_mean = np.mean(wp_all, axis=0)
-    wp_std  = np.std(wp_all, axis=0)
+    wp_std  = np.std(wp_all, axis=0, ddof=1) / np.sqrt(n_files)
 
     plt.figure(figsize=(8, 8), num="Pi max")
 
@@ -1544,7 +1660,7 @@ def compute_piMax_ratio(rp_matrix: npt.NDArray[np.float64],
     wp_all_ratio = wp_all_measured / wp_all_correct
 
     wp_mean_ratio = np.mean(wp_all_ratio, axis=0)
-    wp_std_ratio = np.std(wp_all_ratio, axis=0)
+    wp_std_ratio = np.std(wp_all_ratio, axis=0, ddof=1) / np.sqrt(n_files) / np.sqrt(n_files)
 
     plt.figure(figsize=(8, 8), num="Pi max ratio")
 

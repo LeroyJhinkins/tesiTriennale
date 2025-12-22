@@ -36,6 +36,14 @@ s_matrix_corr, mu_matrix_corr, dd_matrix_corr, dr_matrix_corr, rr_matrix_corr, N
         nElements
     )
 
+# this is for the errors: std computes the error of the single measure,
+# but, we when we do more realisations, we actually need to compute the error of the mean = error / sqrt(nFiles)
+sigmaMean = True
+if sigmaMean:
+    normaliz = 1.0 / np.sqrt(nFiles)
+else:
+    normaliz = 1.0
+
 
 # rebinning and compute 2PCF ------------------------------------------------------------------------------------------------------
 # we want to reduce noise and we don't need to have the fine binning we have (200 bins in s)
@@ -190,6 +198,9 @@ bm.plot_imshow_ratio(
     z_max= 2
 )
 
+plt.show()
+plt.close('all')
+
 
 # custering wedges ----------------------------------------------------------------------------------------------------------------
 # clustering wedge (s) = (int_(mu_min)^(mu_max) xi(s,mu) dmu) / (mu_max - mu_min)
@@ -201,41 +212,7 @@ nWedges = 2
 print(f"\n===== Calculating {nWedges} clustering wedges =====")
 
 # we need to compute clustering wedges but we dont do wedge(mean) we do mean(wedges) to have an accurate estimate of the wedges
-# not rebinned ones
-# wedges_measured_all = []
-# wedges_correct_all = []
-# wedges_ratio_all = []
-# for i in range(nFiles):
-#     wedges_i_measured = prj.compute_clusteringWedges(
-#         nWedges,
-#         s_matrix_meas[i],
-#         mu_matrix_meas[i],
-#         xi_matrix_meas[i]
-#     )
-#     wedges_measured_all.append(wedges_i_measured)
-
-#     wedges_i_correct = prj.compute_clusteringWedges(
-#         nWedges,
-#         s_matrix_corr[i],
-#         mu_matrix_corr[i],
-#         xi_matrix_corr[i]
-#     )
-#     wedges_correct_all.append(wedges_i_correct)
-
-#     wedges_i_ratio = wedges_i_measured / wedges_i_correct
-#     wedges_ratio_all.append(wedges_i_ratio)
-
-# wedges_measured_all = np.array(wedges_measured_all) # shape = (1000, nWedges, n_s_unique)
-# wedgesMean_measured = wedges_measured_all.mean(axis=0)
-
-# wedges_correct_all = np.array(wedges_correct_all) # shape = (1000, nWedges, n_s_unique)
-# wedgesMean_correct = wedges_correct_all.mean(axis=0)
-
-# wedges_ratio_all = np.array(wedges_ratio_all) # shape = (1000, nWedges, n_s_unique)
-# wedgesMean_ratio = wedges_ratio_all.mean(axis=0) # we did it like this because mean(ratio) != ratio(mean)
-                                                   # and we want to be the most accurate possible => we need mean(ratio)
-
-# rebinned ones
+s_unique = np.unique(sMean_array_corr)
 s_unique_reb = np.unique(sMean_array_corr_reb)
 
 wedges_measured_all_reb = []
@@ -263,54 +240,49 @@ for i in range(nFiles):
 
 wedges_measured_all_reb = np.array(wedges_measured_all_reb) # shape = (1000, nWedges, n_s_unique)
 wedgesMean_measured_reb = wedges_measured_all_reb.mean(axis=0)
-wedgesStd_measured_reb = wedges_measured_all_reb.std(axis=0, ddof=1)
+wedgesStd_measured_reb = wedges_measured_all_reb.std(axis=0, ddof=1) * normaliz
 
 wedges_correct_all_reb = np.array(wedges_correct_all_reb) # shape = (1000, nWedges, n_s_unique)
 wedgesMean_correct_reb = wedges_correct_all_reb.mean(axis=0)
-wedgesStd_correct_reb = wedges_correct_all_reb.std(axis=0, ddof=1)
+wedgesStd_correct_reb = wedges_correct_all_reb.std(axis=0, ddof=1) * normaliz
 
 wedges_ratio_all_reb = np.array(wedges_ratio_all_reb) # shape = (1000, nWedges, n_s_unique)
 wedgesMean_ratio_reb = wedges_ratio_all_reb.mean(axis=0) # we did it like this because mean(ratio) != ratio(mean)
-wedgesStd_ratio_reb = wedges_ratio_all_reb.std(axis=0, ddof=1) # and we want to be the most accurate possible => we need mean(ratio)
+wedgesStd_ratio_reb = wedges_ratio_all_reb.std(axis=0, ddof=1) * normaliz # and we want to be the most accurate possible => we need mean(ratio)
 
 # covariance matrices
-wedgesCov_measured_reb = []
-wedgesCov_correct_reb = []
-for w in range(nWedges):
-    cov_w_measured_reb = np.cov(wedges_measured_all_reb[:,w,:], rowvar=False)
-    wedgesCov_measured_reb.append(cov_w_measured_reb)
-    
-    cov_w_correct_reb = np.cov(wedges_correct_all_reb[:,w,:], rowvar=False)
-    wedgesCov_correct_reb.append(cov_w_correct_reb)
+# reorder to (nFiles, nWedges * n_s_unique) in order to get the full covariance matrix
+wedges_measured_all_reb_flatten = wedges_measured_all_reb.reshape(nFiles, nWedges * len(s_unique_reb))
+wedges_correct_all_reb_flatten = wedges_correct_all_reb.reshape(nFiles, nWedges * len(s_unique_reb))
 
-wedgesCov_measured_reb = np.array(wedgesCov_measured_reb) # shape = (nWedges, n_s_unique, n_s_unique)
-wedgesCov_correct_reb = np.array(wedgesCov_correct_reb) # shape = (nWedges, n_s_unique, n_s_unique)
+wedgesCov_measured_reb = np.cov(wedges_measured_all_reb_flatten, rowvar=False) # (n_l_values * n_s_unique, n_l_values * n_s_unique)
+wedgesCov_correct_reb = np.cov(wedges_correct_all_reb_flatten, rowvar=False) # (n_l_values * n_s_unique, n_l_values * n_s_unique)
 
-mu_edges = np.linspace(0.0, 1.0, nWedges + 1)
-for w in range(nWedges):
-    mu_min = mu_edges[w]
-    mu_max = mu_edges[w + 1]
-    label = fr"Correlation Matrix for $\xi_{{[{mu_min:.2f}, \,{mu_max:.2f}]}}$"
+s_wedges_reb = np.tile(s_unique_reb, nWedges)
 
-    bm.plot_correlationMatrix(
-        coords= "SMU",
-        scale= s_unique_reb,
-        cov= wedgesCov_measured_reb[w],
-        base_path= "graphs/z1_rebin",
-        kind= "measured",
-        fig= label,
-        filename= f"wedgeCov_[{mu_min:.2f},{mu_max:.2f}]_meas"
-    )
-    
-    bm.plot_correlationMatrix(
-        coords= "SMU",
-        scale= s_unique_reb,
-        cov= wedgesCov_correct_reb[w],
-        base_path= "graphs/z1_rebin",
-        kind= "correct",
-        fig= label,
-        filename= f"wedgeCov_[{mu_min:.2f},{mu_max:.2f}]_corr"
-    )
+label = r"Correlation Matrix for $\xi_{[\mu_\mathrm{min}, \mu_\mathrm{max}]}$"
+
+bm.plot_correlationMatrix(
+    coords= "SMU",
+    scale= s_wedges_reb,
+    cov= wedgesCov_measured_reb,
+    base_path= "graphs/z1_rebin",
+    kind= "measured",
+    fig= label,
+    filename= f"wedgesCov_meas",
+    n_wedges= nWedges
+)
+
+bm.plot_correlationMatrix(
+    coords= "SMU",
+    scale= s_wedges_reb,
+    cov= wedgesCov_correct_reb,
+    base_path= "graphs/z1_rebin",
+    kind= "correct",
+    fig= label,
+    filename= f"wedgesCov_corr",
+    n_wedges= nWedges
+)
 
 # plotting
 prj.plot_clusteringWedges_measVScorr(
@@ -388,11 +360,31 @@ prj.compute_muMax_ratio(
     ylim=(0.6,0.8)
 )
 
+plt.show()
+plt.close('all')
+
 
 # multipoles projection -----------------------------------------------------------------------------------------------------------
 # same thing for the multipoles
-lValues = np.array([0])
+lValues = np.array([0,2,4])
+print("\n===== Calculating monopoles =====")
 
+# not rebinned ones
+multipoles_measured_all = []
+for i in range(nFiles):
+    multipoles_i_measured = prj.compute_multipoles(
+        lValues,
+        s_matrix_meas[i],
+        mu_matrix_meas[i],
+        xi_matrix_meas[i]
+    )
+    multipoles_measured_all.append(multipoles_i_measured)
+
+multipoles_measured_all = np.array(multipoles_measured_all) # shape = (1000, n_s_unique, n_l_values)
+multipolesMean_measured = multipoles_measured_all.mean(axis=0)
+multipolesStd_measured = multipoles_measured_all.std(axis=0, ddof=1) * normaliz
+
+# rebinned ones
 multipoles_measured_all_reb = []
 multipoles_correct_all_reb = []
 multipoles_ratio_all_reb = []
@@ -418,55 +410,52 @@ for i in range(nFiles):
 
 multipoles_measured_all_reb = np.array(multipoles_measured_all_reb) # shape = (1000, n_s_unique, n_l_values)
 multipolesMean_measured_reb = multipoles_measured_all_reb.mean(axis=0)
-multipolesStd_measured_reb = multipoles_measured_all_reb.std(axis=0, ddof=1)
+multipolesStd_measured_reb = multipoles_measured_all_reb.std(axis=0, ddof=1) * normaliz
 
 multipoles_correct_all_reb = np.array(multipoles_correct_all_reb) # shape = (1000, n_s_unique, n_l_values)
 multipolesMean_correct_reb = multipoles_correct_all_reb.mean(axis=0)
-multipolesStd_correct_reb = multipoles_correct_all_reb.std(axis=0, ddof=1)
+multipolesStd_correct_reb = multipoles_correct_all_reb.std(axis=0, ddof=1) * normaliz
 
 multipoles_ratio_all_reb = np.array(multipoles_ratio_all_reb) # shape = (1000, n_s_unique, n_l_values)
 multipolesMean_ratio_reb = multipoles_ratio_all_reb.mean(axis=0) # we did it like this because mean(ratio) != ratio(mean)
-multipolesStd_ratio_reb = multipoles_ratio_all_reb.std(axis=0, ddof=1) # and we want to be the most accurate possible => we need mean(ratio) 
+multipolesStd_ratio_reb = multipoles_ratio_all_reb.std(axis=0, ddof=1) * normaliz # and we want to be the most accurate possible => we need mean(ratio) 
 
 # covariance matrices
-multipolesCov_measured_reb = []
-multipolesCov_correct_reb = []
-for l in range(len(lValues)):
-    cov_l_measured_reb = np.cov(multipoles_measured_all_reb[:,:,l], rowvar=False)
-    multipolesCov_measured_reb.append(cov_l_measured_reb)
-    
-    cov_l_correct_reb = np.cov(multipoles_correct_all_reb[:,:,l], rowvar=False)
-    multipolesCov_correct_reb.append(cov_l_correct_reb)
+# reorder to (nFiles, n_l_values * n_s_unique) in order to get the full covariance matrix
+multipoles_measured_all_reb_flatten = np.transpose(multipoles_measured_all_reb, (0, 2, 1)).reshape(nFiles, len(lValues) * len(s_unique_reb))
+multipoles_correct_all_reb_flatten = np.transpose(multipoles_correct_all_reb, (0, 2, 1)).reshape(nFiles, len(lValues) * len(s_unique_reb))
 
-multipolesCov_measured_reb = np.array(multipolesCov_measured_reb) # shape = (n_l_values, n_s_unique, n_s_unique)
-multipolesCov_correct_reb = np.array(multipolesCov_correct_reb) # shape = (n_l_values, n_s_unique, n_s_unique)
+multipolesCov_measured_reb = np.cov(multipoles_measured_all_reb_flatten, rowvar=False) # (n_l_values * n_s_unique, n_l_values * n_s_unique)
+multipolesCov_correct_reb = np.cov(multipoles_correct_all_reb_flatten, rowvar=False) # (n_l_values * n_s_unique, n_l_values * n_s_unique)
 
-for i, l in enumerate(lValues):
-    label = fr"Correlation Matrix for $\xi_{{{l}}}$"
+s_multipoles_reb = np.tile(s_unique_reb, len(lValues))
 
-    bm.plot_correlationMatrix(
-        coords= "SMU",
-        scale= s_unique_reb,
-        cov= multipolesCov_measured_reb[i],
-        base_path= "graphs/z1_rebin",
-        kind= "measured",
-        fig= label,
-        filename= f"multiCov_{l}_meas"
-    )
-    
-    bm.plot_correlationMatrix(
-        coords= "SMU",
-        scale= s_unique_reb,
-        cov= multipolesCov_correct_reb[i],
-        base_path= "graphs/z1_rebin",
-        kind= "correct",
-        fig= label,
-        filename= f"multiCov_{l}_corr"
-    )
+label = r"Correlation Matrix for $\xi_\ell$"
+
+bm.plot_correlationMatrix(
+    coords= "SMU",
+    scale= s_multipoles_reb,
+    cov= multipolesCov_measured_reb,
+    base_path= "graphs/z1_rebin",
+    kind= "measured",
+    fig= label,
+    filename= f"multiCov_meas",
+    l_values=lValues
+)
+
+bm.plot_correlationMatrix(
+    coords= "SMU",
+    scale= s_multipoles_reb,
+    cov= multipolesCov_correct_reb,
+    base_path= "graphs/z1_rebin",
+    kind= "correct",
+    fig= label,
+    filename= f"multiCov_corr",
+    l_values=lValues
+)
 
 # plotting
 nPoints = 5
-print("\n===== Calculating monopoles =====")
 print(f"First {nPoints} measured points:")
 prj.print_multipoles(
     l_values= lValues,
@@ -483,25 +472,42 @@ prj.print_multipoles(
     n_values= nPoints
 )
 
-prj.plot_multipole_measVScorr(
-    l_value= lValues[0],
-    s_unique= s_unique_reb,
-    multipole_measured= multipolesMean_measured_reb[:,0],
-    multipole_correct= multipolesMean_correct_reb[:,0],
-    err_multipole_measured=multipolesStd_measured_reb[:,0],
-    err_multipole_correct=multipolesStd_correct_reb[:,0],
+prj.plot_multipoles_rebinVSnot(
+    l_values= lValues,
+    s_unique= s_unique,
+    s_unique_rebin= s_unique_reb,
+    multipoles= multipolesMean_measured,
+    multipoles_rebin= multipolesMean_measured_reb,
+    err_multipoles= multipolesStd_measured,
+    err_multipoles_rebin= multipolesStd_measured_reb,
     base_path= "graphs/z1_rebin"
 )
 
-prj.plot_multipole_ratio(
-    l_value= lValues[0],
+prj.plot_multipoles_measVScorr(
+    l_values= lValues,
     s_unique= s_unique_reb,
-    multipole_ratio= multipolesMean_ratio_reb[:,0],
-    err_multipole_ratio= multipolesStd_ratio_reb[:,0],
+    multipoles_measured= multipolesMean_measured_reb,
+    multipoles_correct= multipolesMean_correct_reb,
+    err_multipoles_measured= multipolesStd_measured_reb,
+    err_multipoles_correct= multipolesStd_correct_reb,
+    base_path= "graphs/z1_rebin"
+)
+
+prj.plot_multipoles_ratio(
+    l_values= lValues,
+    s_unique= s_unique_reb,
+    multipoles_ratio= multipolesMean_ratio_reb,
+    err_multipoles_ratio= multipolesStd_ratio_reb,
     base_path= "graphs/z1_rebin",
     ylim= (0,2)
 )
 
+# requested by Martin
+# np.save("cov_wedge_005.npy", wedgesCov_measured_reb[0])
+# np.save("mean_wedge_005.npy", wedgesMean_measured_reb[0])
+# np.save("s_unique_reb.npy", s_unique_reb)
+# np.save("cov_multipoles.npy", multipolesCov_measured_reb)
+# np.save("mean_multipoles.npy", multipoles_measured_all_reb_flatten.mean(axis=0))
 
 plt.show()
 plt.close('all')

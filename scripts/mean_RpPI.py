@@ -35,6 +35,15 @@ rp_matrix_correct, pi_matrix_correct, xi_matrix_correct = read.readFITS_auto_ser
 
 xi_matrix_ratio = xi_matrix_measured / xi_matrix_correct
 
+# this is for the errors: std computes the error of the single measure,
+# but, we when we do more realisations, we actually need to compute the error of the mean = error / sqrt(nFiles)
+sigmaMean = True
+if sigmaMean:
+    normaliz = 1.0 / np.sqrt(nFiles)
+else:
+    normaliz = 1.0
+
+
 # compute mean --------------------------------------------------------------------------------------------------------------------
 # we want to get rid of statistical errors in order to emphasize the systematical error
 # so we want to mean the values over the files
@@ -132,6 +141,9 @@ bm.plot_imshow_ratio(
     z_max= 2.1
 )
 
+plt.show()
+plt.close('all')
+
 
 # projected function --------------------------------------------------------------------------------------------------------------
 print("\n===== Calculating projected function =====")
@@ -161,15 +173,15 @@ for i in range(nFiles):
 
 wp_measured_all = np.array(wp_measured_all) # shape = (1000, n_unique)
 wpMean_measured = wp_measured_all.mean(axis=0)
-wpStd_measured = wp_measured_all.std(axis=0, ddof=1)
+wpStd_measured = wp_measured_all.std(axis=0, ddof=1) * normaliz
 
 wp_correct_all = np.array(wp_correct_all) # shape = (1000, n_unique)
 wpMean_correct = wp_correct_all.mean(axis=0)
-wpStd_correct = wp_correct_all.std(axis=0, ddof=1)
+wpStd_correct = wp_correct_all.std(axis=0, ddof=1) * normaliz
 
 wp_ratio_all = np.array(wp_ratio_all) # shape = (1000, n_unique)
 wpMean_ratio = wp_ratio_all.mean(axis=0) # we did it like this because mean(ratio) != ratio(mean)
-wpStd_ratio = wp_ratio_all.std(axis=0, ddof=1) # and we want to be the most accurate possible => we need mean(ratio) [same for std]
+wpStd_ratio = wp_ratio_all.std(axis=0, ddof=1) * normaliz # and we want to be the most accurate possible => we need mean(ratio)
 
 prj.plot_projectedFunction_measVScorr(
     rp_unique= rp_unique,

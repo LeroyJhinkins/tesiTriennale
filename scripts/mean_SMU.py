@@ -37,6 +37,15 @@ xi_matrix_ratio = xi_matrix_measured / xi_matrix_correct
 
 print()
 
+# this is for the errors: std computes the error of the single measure,
+# but, we when we do more realisations, we actually need to compute the error of the mean = error / sqrt(nFiles)
+sigmaMean = True
+if sigmaMean:
+    normaliz = 1.0 / np.sqrt(nFiles)
+else:
+    normaliz = 1.0
+
+
 # compute mean --------------------------------------------------------------------------------------------------------------------
 # we want to get rid of statistical errors in order to emphasize the systematical error
 # so we want to mean the values over the files
@@ -142,6 +151,9 @@ bm.plot_imshow_ratio(
 # plt.tight_layout()
 # plt.savefig("graphs/z1/2DmapRpPI_ratio.pdf", dpi=600)
 
+plt.show()
+plt.close('all')
+
 
 # custering wedges ----------------------------------------------------------------------------------------------------------------
 # clustering wedge (s) = (int_(mu_min)^(mu_max) xi(s,mu) dmu) / (mu_max - mu_min)
@@ -180,15 +192,15 @@ for i in range(nFiles):
 
 wedges_measured_all = np.array(wedges_measured_all) # shape = (1000, nWedges, n_s_unique)
 wedgesMean_measured = wedges_measured_all.mean(axis=0)
-wedgesStd_measured = wedges_measured_all.std(axis=0, ddof=1)
+wedgesStd_measured = wedges_measured_all.std(axis=0, ddof=1) * normaliz
 
 wedges_correct_all = np.array(wedges_correct_all) # shape = (1000, nWedges, n_s_unique)
 wedgesMean_correct = wedges_correct_all.mean(axis=0)
-wedgesStd_correct = wedges_correct_all.std(axis=0, ddof=1)
+wedgesStd_correct = wedges_correct_all.std(axis=0, ddof=1) * normaliz
 
 wedges_ratio_all = np.array(wedges_ratio_all) # shape = (1000, nWedges, n_s_unique)
 wedgesMean_ratio = wedges_ratio_all.mean(axis=0) # we did it like this because mean(ratio) != ratio(mean)
-wedgesStd_ratio = wedges_ratio_all.std(axis=0, ddof=1) # and we want to be the most accurate possible => we need mean(ratio) [same for std]
+wedgesStd_ratio = wedges_ratio_all.std(axis=0, ddof=1) * normaliz # and we want to be the most accurate possible => we need mean(ratio)
 
 prj.plot_clusteringWedges_measVScorr(
     n_wedges= nWedges,
@@ -265,10 +277,14 @@ prj.compute_muMax_ratio(
     ylim=(0.6,0.8)
 )
 
+plt.show()
+plt.close('all')
+
 
 # multipoles projection -----------------------------------------------------------------------------------------------------------
 # same thing for the multipoles
 lValues = np.array([0])
+print("\n===== Calculating monopoles =====")
 
 multipoles_measured_all = []
 multipoles_correct_all = []
@@ -295,18 +311,17 @@ for i in range(nFiles):
 
 multipoles_measured_all = np.array(multipoles_measured_all) # shape = (1000, n_s_unique, n_l_values)
 multipolesMean_measured = multipoles_measured_all.mean(axis=0)
-multipolesStd_measured = multipoles_measured_all.std(axis=0, ddof=1)
+multipolesStd_measured = multipoles_measured_all.std(axis=0, ddof=1) * normaliz
 
 multipoles_correct_all = np.array(multipoles_correct_all) # shape = (1000, n_s_unique, n_l_values)
 multipolesMean_correct = multipoles_correct_all.mean(axis=0)
-multipolesStd_correct = multipoles_correct_all.std(axis=0, ddof=1)
+multipolesStd_correct = multipoles_correct_all.std(axis=0, ddof=1) * normaliz
 
 multipoles_ratio_all = np.array(multipoles_ratio_all) # shape = (1000, n_s_unique, n_l_values)
 multipolesMean_ratio = multipoles_ratio_all.mean(axis=0) # we did it like this because mean(ratio) != ratio(mean)
-multipolesStd_ratio = multipoles_ratio_all.std(axis=0, ddof=1) # and we want to be the most accurate possible => we need mean(ratio) [same for std]
+multipolesStd_ratio = multipoles_ratio_all.std(axis=0, ddof=1) * normaliz # and we want to be the most accurate possible => we need mean(ratio)
 
 nPoints = 5
-print("\n===== Calculating monopoles =====")
 print(f"First {nPoints} measured points:")
 prj.print_multipoles(
     l_values= lValues,
@@ -322,22 +337,22 @@ prj.print_multipoles(
     n_values= nPoints
 )
 
-prj.plot_multipole_measVScorr(
-    l_value= lValues[0],
+prj.plot_multipoles_measVScorr(
+    l_values= lValues,
     s_unique= s_unique,
-    multipole_measured= multipolesMean_measured[:,0],
-    multipole_correct= multipolesMean_correct[:,0],
-    err_multipole_measured=multipolesStd_measured[:,0],
-    err_multipole_correct=multipolesStd_correct[:,0],
+    multipoles_measured= multipolesMean_measured,
+    multipoles_correct= multipolesMean_correct,
+    err_multipoles_measured=multipolesStd_measured,
+    err_multipoles_correct=multipolesStd_correct,
     base_path= "graphs/z1")
 
-prj.plot_multipole_ratio(
-    l_value= lValues[0],
+prj.plot_multipoles_ratio(
+    l_values= lValues,
     s_unique= s_unique,
-    multipole_ratio= multipolesMean_ratio[:,0],
-    err_multipole_ratio= multipolesStd_ratio[:,0],
+    multipoles_ratio= multipolesMean_ratio,
+    err_multipoles_ratio= multipolesStd_ratio,
     base_path= "graphs/z1",
-    ylim= (-2,2)
+    ylim= (0,2)
 )
 
 
