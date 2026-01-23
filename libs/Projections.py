@@ -1370,10 +1370,10 @@ def plot_projectedFunction_ratio(rp_unique: npt.NDArray[np.float64],
 
 
 def compute_projectedFunction_BAOpeaks(rp_unique: npt.NDArray[np.float64],
-                                wp: npt.NDArray[np.float64],
-                                err_wp: Optional[npt.NDArray[np.float64]] = None,
-                                rp_min: float = 50,
-                                rp_max: float = 150
+                                       wp: npt.NDArray[np.float64],
+                                       err_wp: Optional[npt.NDArray[np.float64]] = None,
+                                       rp_min: float = 50,
+                                       rp_max: float = 150
 ) -> Union[
     Tuple[float, float],
     Tuple[float, float, float, float]
@@ -1456,9 +1456,9 @@ def compute_projectedFunction_BAOpeaks(rp_unique: npt.NDArray[np.float64],
 
 
 def print_projectedFunction_BAOintervals(rp_peak: float,
-                                  wp_peak: float,
-                                  rp_low: Optional[float] = None,
-                                  rp_high: Optional[float] = None
+                                         wp_peak: float,
+                                         rp_low: Optional[float] = None,
+                                         rp_high: Optional[float] = None
 ) -> None:
     """
     Print the BAO peak position for the projected function wₚ(rₚ),
@@ -1693,3 +1693,97 @@ def compute_piMax_ratio(rp_matrix: npt.NDArray[np.float64],
     plt.tight_layout()
 
     plt.savefig(f"{base_path}/wp_piMax_ratio.pdf", dpi=600)
+
+
+# ================================================================================================================================= #
+#                                                                                                                                   #
+#                                                             Utilities                                                             #
+#                                                                                                                                   #
+# ================================================================================================================================= #
+def plot_snr(coords: str,
+             scale: npt.NDArray[np.float64],
+             mean_array: npt.NDArray[np.float64],
+             err_array: npt.NDArray[np.float64],
+             base_path: str,
+             kind: str,
+             fig: str,
+             filename: str,
+             y_label: str,
+             xlim: Optional[Tuple[float, float]] = None,
+             ylim: Optional[Tuple[float, float]] = None
+) -> npt.NDArray[np.float64]:
+    """
+    Computes and plots the Signal to Noise Ratio (mean / error), where error is
+    the error of the mean.
+    
+    Parameters
+    ----------
+    coords : str
+        Coordinate system of the input data. Must be either `"SMU"` for
+        (μ, s) or `"RpPI"` for (rₚ, π).
+    scale : np.ndarray
+        Array containing the unique scale values (s or rₚ) for each point.
+    mean_array : np.ndarray
+        Array containing the mean of the variable.
+    err_array : np.ndarray
+        Array containing the error of the variable.
+    base_path : str
+        Path to the directory in which the output figure will be saved.
+    kind : str
+        Type of correlation map to plot. Must be either `"measured"`,
+        `"correct"`. Used for labeling the plot.
+    fig : str
+        `num` value to feed `plt.figure`.
+    filename : str
+        Name for the file to be saved.
+    xlim : tuple of float, optional
+        Limits for the x-axis of the plot.
+    ylim : tuple of float, optional
+        Limits for the y-axis of the plot.
+
+    Returns
+    -------
+    np.ndarray
+        Array of the Signal to Noise Ratio `snr_array`.
+    """
+    
+    # check for coords to be either "SMU" or "RpPI"
+    valid_coords = ["SMU", "RpPI"]
+    if coords == "SMU":
+        x_label = r'$s \,[h^{-1} \, \mathrm{Mpc}]$'
+
+    elif coords == "RpPI":
+        x_label = r'$r_\mathrm{p} \,[h^{-1} \, \mathrm{Mpc}]$'
+
+    else:
+        raise ValueError(f"coords must be one of {valid_coords}, got '{coords}'")
+
+    # check for kind to be either "measured" or "correct"
+    valid_kinds = ["measured", "correct"]
+    if kind not in valid_kinds:
+        raise ValueError(f"kind must be one of {valid_kinds}, got '{kind}'")
+
+    with np.errstate(divide='ignore', invalid='ignore'):
+        snr_array = mean_array / err_array
+
+    plt.figure(figsize=(8, 8), num= fig + " " + kind)
+    
+    plt.plot(scale, snr_array, linestyle='--', linewidth=1.0, marker='o', markersize=3)
+    
+    plt.title(fig + " " + kind)
+    
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
+
+    if xlim is not None:
+        plt.xlim(xlim)
+    if ylim is not None:
+        plt.ylim(ylim)
+
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+    plt.tight_layout()
+
+    plt.savefig(f"{base_path}/{filename}.pdf", dpi=600)
+
+    return snr_array

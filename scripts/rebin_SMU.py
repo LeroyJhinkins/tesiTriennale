@@ -502,12 +502,12 @@ prj.plot_multipoles_ratio(
     ylim= (0,2)
 )
 
-# requested by Martin
-# np.save("cov_wedge_005.npy", wedgesCov_measured_reb[0])
-# np.save("mean_wedge_005.npy", wedgesMean_measured_reb[0])
-# np.save("s_unique_reb.npy", s_unique_reb)
-# np.save("cov_multipoles.npy", multipolesCov_measured_reb)
-# np.save("mean_multipoles.npy", multipoles_measured_all_reb_flatten.mean(axis=0))
+# save data for model fitting
+np.save("outData/cov_wedges.npy", wedgesCov_measured_reb[0])
+np.save("outData/mean_wedges.npy", wedgesMean_measured_reb[0])
+np.save("outData/s_unique_reb.npy", s_unique_reb)
+np.save("outData/cov_multipoles.npy", multipolesCov_measured_reb)
+np.save("outData/mean_multipoles.npy", multipoles_measured_all_reb_flatten.mean(axis=0))
 
 plt.show()
 plt.close('all')

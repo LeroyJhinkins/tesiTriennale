@@ -10,3 +10,4 @@ corner
 tqdm
 scikit-learn
 basemap
+nautilus-sampler

@@ -44,4 +44,7 @@ pip install -r utils/requirements.txt
 # Add the libs directory to the virtual environment
 pip install -e .
 
+# Install the corrected comet-emu files
+(cd libs/comet-emu && pip install -e .)
+
 echo "\nVirtual environment setup complete!"
