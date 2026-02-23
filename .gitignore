@@ -1,6 +1,9 @@
 # temp file
 temp/
 
+# data files (see archived mails to obtain them)
+data/
+
 # LaTeX extra output
 *.aux
 *.fdb_latexmk
