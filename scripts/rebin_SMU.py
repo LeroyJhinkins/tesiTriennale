@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
@@ -17,23 +18,32 @@ matplotlib.rcParams['toolbar'] = 'None' # disabling window bars
 
 
 # read FITS files -----------------------------------------------------------------------------------------------------------------
+redshift_bin = int(sys.argv[1])
+valid_bins = [1,2,3,4]
+if redshift_bin not in valid_bins:
+    raise ValueError(f"Please declare redshift bin to read, must be one of {valid_bins}, got {redshift_bin}")
+
 nFiles = 1000
 nElements = 40000
 
 print(f"\nReading {nFiles} measured files...")
 s_matrix_meas, mu_matrix_meas, dd_matrix_meas, dr_matrix_meas, rr_matrix_meas, Ndd_matrix_meas, Ndr_matrix_meas, Nrr_matrix_meas = \
     read.readFITS_pairs_series_SMU(
-        "data/z1_data/z1_measured",
+        f"data/z{redshift_bin}_data/z{redshift_bin}_measured",
         nFiles,
-        nElements
+        nElements,
+        "measured",
+        redshift_bin
     )
 
 print(f"Reading {nFiles} correct files...")
 s_matrix_corr, mu_matrix_corr, dd_matrix_corr, dr_matrix_corr, rr_matrix_corr, Ndd_matrix_corr, Ndr_matrix_corr, Nrr_matrix_corr = \
     read.readFITS_pairs_series_SMU(
-        "data/z1_data/z1_correct",
+        f"data/z{redshift_bin}_data/z{redshift_bin}_correct",
         nFiles,
-        nElements
+        nElements,
+        "correct",
+        redshift_bin
     )
 
 # this is for the errors: std computes the error of the single measure,
@@ -150,7 +160,7 @@ if np.allclose(muMean_array_meas_reb, muMean_array_corr_reb, atol=1e-4) and \
         x_array= muMean_array_meas_reb,
         y_array= sMean_array_meas_reb,
         z_array= xiMean_array_meas_reb,
-        base_path= "graphs/z1_rebin",
+        base_path= f"graphs/z{redshift_bin}_rebin",
         kind= "measured",
         v_min= vmin,
         v_max= vmax
@@ -162,7 +172,7 @@ if np.allclose(muMean_array_meas_reb, muMean_array_corr_reb, atol=1e-4) and \
         x_array= muMean_array_corr_reb,
         y_array= sMean_array_corr_reb,
         z_array= xiMean_array_corr_reb,
-        base_path= "graphs/z1_rebin",
+        base_path= f"graphs/z{redshift_bin}_rebin",
         kind="correct",
         v_min= vmin,
         v_max= vmax
@@ -180,7 +190,7 @@ bm.plot_contourf_ratio(
     x_array= muMean_array_meas_reb,
     y_array= sMean_array_meas_reb,
     z_array_ratio= xiMean_array_ratio_reb,
-    base_path= "graphs/z1_rebin",
+    base_path= f"graphs/z{redshift_bin}_rebin",
     v_min= -1.5,
     v_max= 1.5,
     z_max= 2
@@ -191,7 +201,7 @@ bm.plot_imshow_ratio(
     x_array= muMean_array_meas_reb,
     y_array= sMean_array_meas_reb,
     z_array_ratio= xiMean_array_ratio_reb,
-    base_path= "graphs/z1_rebin",
+    base_path= f"graphs/z{redshift_bin}_rebin",
     v_min= -1.5,
     v_max= 1.5,
     interp="nearest",
@@ -266,7 +276,7 @@ bm.plot_correlationMatrix(
     coords= "SMU",
     scale= s_wedges_reb,
     cov= wedgesCov_measured_reb,
-    base_path= "graphs/z1_rebin",
+    base_path= f"graphs/z{redshift_bin}_rebin",
     kind= "measured",
     fig= label,
     filename= f"wedgesCov_meas",
@@ -277,7 +287,7 @@ bm.plot_correlationMatrix(
     coords= "SMU",
     scale= s_wedges_reb,
     cov= wedgesCov_correct_reb,
-    base_path= "graphs/z1_rebin",
+    base_path= f"graphs/z{redshift_bin}_rebin",
     kind= "correct",
     fig= label,
     filename= f"wedgesCov_corr",
@@ -292,7 +302,7 @@ prj.plot_clusteringWedges_measVScorr(
     wedges_correct= wedgesMean_correct_reb,
     err_wedges_measured= wedgesStd_measured_reb,
     err_wedges_correct= wedgesStd_correct_reb,
-    base_path= "graphs/z1_rebin"
+    base_path= f"graphs/z{redshift_bin}_rebin"
 )
 
 prj.plot_clusteringWedges_ratio(
@@ -300,7 +310,7 @@ prj.plot_clusteringWedges_ratio(
     s_unique= s_unique_reb,
     wedges_ratio= wedgesMean_ratio_reb,
     err_wedges_ratio= wedgesStd_ratio_reb,
-    base_path= "graphs/z1_rebin",
+    base_path= f"graphs/z{redshift_bin}_rebin",
     ylim=(0,2)
 )
 
@@ -347,7 +357,7 @@ prj.compute_muMax(
     mu_matrix= mu_matrix_meas_reb,
     xi_matrix= xi_matrix_meas_reb,
     mu_max_values= np.array([0.5, 0.6, 0.7, 0.8, 0.9]),
-    base_path= "graphs/z1_rebin"
+    base_path= f"graphs/z{redshift_bin}_rebin"
 )
 
 prj.compute_muMax_ratio(
@@ -356,7 +366,7 @@ prj.compute_muMax_ratio(
     xi_matrix_measured= xi_matrix_meas_reb,
     xi_matrix_correct= xi_matrix_corr_reb,
     mu_max_values= np.array([0.5, 0.6, 0.7, 0.8, 0.9]),
-    base_path= "graphs/z1_rebin",
+    base_path= f"graphs/z{redshift_bin}_rebin",
     ylim=(0.6,0.8)
 )
 
@@ -436,7 +446,7 @@ bm.plot_correlationMatrix(
     coords= "SMU",
     scale= s_multipoles_reb,
     cov= multipolesCov_measured_reb,
-    base_path= "graphs/z1_rebin",
+    base_path= f"graphs/z{redshift_bin}_rebin",
     kind= "measured",
     fig= label,
     filename= f"multiCov_meas",
@@ -447,7 +457,7 @@ bm.plot_correlationMatrix(
     coords= "SMU",
     scale= s_multipoles_reb,
     cov= multipolesCov_correct_reb,
-    base_path= "graphs/z1_rebin",
+    base_path= f"graphs/z{redshift_bin}_rebin",
     kind= "correct",
     fig= label,
     filename= f"multiCov_corr",
@@ -480,7 +490,7 @@ prj.plot_multipoles_rebinVSnot(
     multipoles_rebin= multipolesMean_measured_reb,
     err_multipoles= multipolesStd_measured,
     err_multipoles_rebin= multipolesStd_measured_reb,
-    base_path= "graphs/z1_rebin"
+    base_path= f"graphs/z{redshift_bin}_rebin"
 )
 
 prj.plot_multipoles_measVScorr(
@@ -490,7 +500,7 @@ prj.plot_multipoles_measVScorr(
     multipoles_correct= multipolesMean_correct_reb,
     err_multipoles_measured= multipolesStd_measured_reb,
     err_multipoles_correct= multipolesStd_correct_reb,
-    base_path= "graphs/z1_rebin"
+    base_path= f"graphs/z{redshift_bin}_rebin"
 )
 
 prj.plot_multipoles_ratio(
@@ -498,16 +508,24 @@ prj.plot_multipoles_ratio(
     s_unique= s_unique_reb,
     multipoles_ratio= multipolesMean_ratio_reb,
     err_multipoles_ratio= multipolesStd_ratio_reb,
-    base_path= "graphs/z1_rebin",
+    base_path= f"graphs/z{redshift_bin}_rebin",
     ylim= (0,2)
 )
 
+
 # save data for model fitting
-np.save("outData/cov_wedges.npy", wedgesCov_measured_reb[0])
-np.save("outData/mean_wedges.npy", wedgesMean_measured_reb[0])
-np.save("outData/s_unique_reb.npy", s_unique_reb)
-np.save("outData/cov_multipoles.npy", multipolesCov_measured_reb)
-np.save("outData/mean_multipoles.npy", multipoles_measured_all_reb_flatten.mean(axis=0))
+np.save(f"outData/z{redshift_bin}_rebin/s_unique_reb.npy", s_unique_reb)
+
+np.save(f"outData/z{redshift_bin}_rebin/mean_wedges_measured.npy", wedgesMean_measured_reb[0])
+np.save(f"outData/z{redshift_bin}_rebin/cov_wedges_measured.npy", wedgesCov_measured_reb[0])
+np.save(f"outData/z{redshift_bin}_rebin/mean_wedges_correct.npy", wedgesMean_correct_reb[0])
+np.save(f"outData/z{redshift_bin}_rebin/cov_wedges_correct.npy", wedgesCov_correct_reb[0])
+
+np.save(f"outData/z{redshift_bin}_rebin/mean_multipoles_measured.npy", multipoles_measured_all_reb_flatten.mean(axis=0))
+np.save(f"outData/z{redshift_bin}_rebin/cov_multipoles_measured.npy", multipolesCov_measured_reb)
+np.save(f"outData/z{redshift_bin}_rebin/mean_multipoles_correct.npy", multipoles_correct_all_reb_flatten.mean(axis=0))
+np.save(f"outData/z{redshift_bin}_rebin/cov_multipoles_correct.npy", multipolesCov_correct_reb)
+
 
 plt.show()
 plt.close('all')

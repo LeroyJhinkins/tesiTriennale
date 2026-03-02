@@ -13,7 +13,7 @@ import sys
 import time
 sys.path.append("libs/comet-emu")
 sys.path.append("libs/comet-emu/comet")
-from PTEmu_LPT_new import PTEmu as PTEmu_LPT
+from PTEmu_LPT_new import PTEmu as PTEmu_LPT # type: ignore
 from scipy.stats import norm
 from datetime import datetime
 
@@ -24,7 +24,7 @@ from nautilus import Sampler, Prior
 #-----------------------------
 
 class run_chain():
-    def __init__(self, what_model, smin, de_model='lambda', what_stat='multipoles', mu_edges=[0., 0.5], pi_max=60., multi_z=[1.0], what_cosmo='ELM'):
+    def __init__(self, what_model, smin, de_model='lambda', what_stat='multipoles', mu_edges=[0., 0.5], pi_max=60., multi_z=[1.0], what_cosmo='ELM', what_data='measured'):
         self.smin = smin
         self.de_model = de_model
 
@@ -44,6 +44,7 @@ class run_chain():
 
         self.what_model = what_model
         self.what_stat = what_stat
+        self.what_data = what_data
         if self.what_stat == 'wedges':
             self.mu_edges = mu_edges
         elif self.what_stat == 'proj':
@@ -54,8 +55,8 @@ class run_chain():
             self.output_dir = f'chains/{self.what_model}_template/'
         else:
             self.output_dir = f'chains/{self.what_model}_{self.de_model}/'
-        self.cov_dir = 'outData/'
-        self.data_dir = 'outData/'
+        self.cov_dir = [f'outData/z{int(num)}_rebin/' for num in self.multi_z]
+        self.data_dir = [f'outData/z{int(num)}_rebin/' for num in self.multi_z]
         self.log_dir = 'logs/'
 
         self.full_set_up()
@@ -77,8 +78,7 @@ class run_chain():
         print('Done')
 
     def set_up_data_cov(self):
-        file_data = f'{self.data_dir}mean_{self.what_stat}.npy'
-        file_covar = f'{self.cov_dir}cov_{self.what_stat}.npy'
+        
 
         if self.what_stat == 'multipoles':
             self.icov = np.zeros((3*self.ns, 3*self.ns, self.num_z))
@@ -91,6 +91,8 @@ class run_chain():
         for counter in range(self.num_z):
             #file_data = f'{self.data_dir}AbacusSummit_base_c000_multipoles_correlation_function_galaxies_z{self.multi_z[counter]}_axis_2_AM_asym_HOD_mean_rebinned_{self.ds}hMpc.txt'
             #file_covar = f'{self.cov_dir}covariance_z_{self.multi_z[counter]}_v2_Deltar_{self.ds}hMpc.npy'
+            file_data = f'{self.data_dir[counter]}mean_{self.what_stat}_{self.what_data}.npy'
+            file_covar = f'{self.cov_dir[counter]}cov_{self.what_stat}_{self.what_data}.npy'
             self.s, data_proxy =  self._data_cutting(file_data, mode='ELM') # s will be the same, regardless of redshift
             self.icov[:,:,counter] = self._cov_cutting_abacus(file_covar, mode='ELM')
             self.data_to_fit[:,counter] = data_proxy
@@ -118,23 +120,23 @@ class run_chain():
 
         for counter, z in enumerate(self.multi_z):
             if self.de_model == None:
-                self.prior.add_parameter(f'f_z{counter+1}', dist=(0.5, 1.05))
-                self.prior.add_parameter(f's12_z{counter+1}', dist=(0.2, 1.0))
-                self.prior.add_parameter(f'q_lo_z{counter+1}', dist=(0.9, 1.1))
-                self.prior.add_parameter(f'q_tr_z{counter+1}', dist=(0.9, 1.1))
+                self.prior.add_parameter(f'f_z{int(z)}', dist=(0.5, 1.05))
+                self.prior.add_parameter(f's12_z{int(z)}', dist=(0.2, 1.0))
+                self.prior.add_parameter(f'q_lo_z{int(z)}', dist=(0.9, 1.1))
+                self.prior.add_parameter(f'q_tr_z{int(z)}', dist=(0.9, 1.1))
 
-            self.prior.add_parameter(f'b1_z{counter+1}', dist=(-0.5, 2.5))
+            self.prior.add_parameter(f'b1_z{int(z)}', dist=(-0.5, 2.5))
             if self.what_model == 'CLEFT':
-                self.prior.add_parameter(f'b2_z{counter+1}', dist=(-10.0, 10.0))
-                self.prior.add_parameter(f'bs_z{counter+1}', dist=(-20.0, 20.0))
-                self.prior.add_parameter(f'a_xi_z{counter+1}', dist=(-100., 200.))
-                self.prior.add_parameter(f'a_v_z{counter+1}', dist=(-100., 200.))
-                self.prior.add_parameter(f'a_s_z{counter+1}', dist=(-100., 200.))
+                self.prior.add_parameter(f'b2_z{int(z)}', dist=(-10.0, 10.0))
+                self.prior.add_parameter(f'bs_z{int(z)}', dist=(-20.0, 20.0))
+                self.prior.add_parameter(f'a_xi_z{int(z)}', dist=(-100., 200.))
+                self.prior.add_parameter(f'a_v_z{int(z)}', dist=(-100., 200.))
+                self.prior.add_parameter(f'a_s_z{int(z)}', dist=(-100., 200.))
             elif self.what_model == 'CLPT':
-                self.prior.add_parameter(f'b2_z{counter+1}', dist=(-10.0, 10.0))
-                self.prior.add_parameter(f'sig_v_z{counter+1}', dist=(0., 100.0))
+                self.prior.add_parameter(f'b2_z{int(z)}', dist=(-10.0, 10.0))
+                self.prior.add_parameter(f'sig_v_z{int(z)}', dist=(0., 100.0))
             elif self.what_model == 'ZA':
-                self.prior.add_parameter(f'sig_v_z{counter+1}', dist=(0., 100.0))
+                self.prior.add_parameter(f'sig_v_z{int(z)}', dist=(0., 100.0))
 
         self.sampler = Sampler(self.prior, self.likelihood, n_live=self.n_live, pool=self.pool, vectorized=False)
 
@@ -146,10 +148,10 @@ class run_chain():
         print(f"pool and n_live: {self.pool, self.n_live}")
 
         # Extract chain
-        self.points, self.log_w, self.log_l = self.sampler.posterior()
+        self.points, self.log_w, self.log_l = self.sampler.posterior() # type: ignore
 
     def store_and_log(self):
-        chain_shape = np.shape(self.points)
+        chain_shape = np.shape(self.points) # type: ignore
 
         # Logging
         now = datetime.now()
@@ -158,9 +160,9 @@ class run_chain():
             myfile.write(f"Time end={time_string}; path+name={self.modefit}; multi_z={self.multi_z}; pool={self.pool}; n_live={self.n_live}; final num_samp_points={chain_shape[0]}; num_fit_par={chain_shape[1]}; runtime in seconds={self.total_time}; runtime in hours={self.total_time/3600.}; CPUs per iteration={self.total_time*self.pool/chain_shape[0]}; what_stat={self.what_stat}\n")
 
         # Storing
-        final_chain = np.concatenate((np.array([np.exp(self.log_w)]).T, np.array([self.log_l]).T, self.points), axis=1)
+        final_chain = np.concatenate((np.array([np.exp(self.log_w)]).T, np.array([self.log_l]).T, self.points), axis=1) # type: ignore
         print(np.shape(final_chain))
-        np.savetxt(f"{self.modefit}_nlive{self.n_live}_pool_{self.pool}_newcode.txt", final_chain)
+        np.savetxt(f"{self.modefit}_nlive{self.n_live}_pool_{self.pool}_newcode_{self.what_data}.txt", final_chain)
 
     def full_run(self):
         self.run_sampler()
@@ -199,12 +201,12 @@ class run_chain():
         if self.what_stat == 'multipoles':
             s_3l = np.hstack((s_raw, s_raw, s_raw)) # There are three multipoles
             s_3l_2D_xx, s_3l_2D_yy = np.meshgrid(s_3l, s_3l, indexing='ij') # This gives us the two matrices containing the respective s_bins of the covariances
-            cut_cov = data_cov[((s_3l_2D_xx > self.smin) & (s_3l_2D_xx < self.smax)) & ((s_3l_2D_yy > self.smin) & (s_3l_2D_yy < self.smax))].reshape(num_tot, num_tot) / 1. # Divide by 25 because we fit the mean of 25 realisations
+            cut_cov = data_cov[((s_3l_2D_xx > self.smin) & (s_3l_2D_xx < self.smax)) & ((s_3l_2D_yy > self.smin) & (s_3l_2D_yy < self.smax))].reshape(num_tot, num_tot) / 5.06617801 # Divide by 25 because we fit the mean of 25 realisations
             icov_ret = inv(cut_cov)
         elif self.what_stat == 'wedges':
             s_3l = s_raw # Currently supports only one wedge 
             s_3l_2D_xx, s_3l_2D_yy = np.meshgrid(s_3l, s_3l, indexing='ij') # This gives us the two matrices containing the respective s_bins of the covariances
-            cut_cov = data_cov[((s_3l_2D_xx > self.smin) & (s_3l_2D_xx < self.smax)) & ((s_3l_2D_yy > self.smin) & (s_3l_2D_yy < self.smax))].reshape(num_tot, num_tot) / 1. # Divide by 1000. because we fit the mean of 1000. realisations
+            cut_cov = data_cov[((s_3l_2D_xx > self.smin) & (s_3l_2D_xx < self.smax)) & ((s_3l_2D_yy > self.smin) & (s_3l_2D_yy < self.smax))].reshape(num_tot, num_tot) / 5.06617801 # Divide by 1000. because we fit the mean of 1000. realisations
 
         icov_ret = inv(cut_cov)
         return icov_ret
@@ -321,8 +323,12 @@ if __name__ == "__main__":
 
     model_arg = sys.argv[1]
     case_num = int(sys.argv[2])
+    data_type = sys.argv[3]
 
-    the_chain = run_chain(model_arg, cases[case_num][0], cases[case_num][1], what_stat='multipoles', multi_z=[1.0])
+    raw_bins = sys.argv[4]
+    redshift_bins = [float(num) for num in raw_bins.split(',')]
+
+    the_chain = run_chain(model_arg, cases[case_num][0], cases[case_num][1], what_stat='multipoles', multi_z=redshift_bins, what_data=data_type)
 
     #the_chain.test()
     the_chain.full_run()

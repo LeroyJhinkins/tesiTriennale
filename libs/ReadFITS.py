@@ -102,7 +102,9 @@ def readFITS_multipoles(filepath: str
 
 def readFITS_auto_series_SMU(base_path: str,
                              n_files: int,
-                             n_elements: int
+                             n_elements: int,
+                             kind: str = "measured",
+                             z_bin: int = 1
 ) -> Tuple[
     npt.NDArray[np.float64],
     npt.NDArray[np.float64],
@@ -123,6 +125,11 @@ def readFITS_auto_series_SMU(base_path: str,
         `EUC_LE3_GCL_2PCF_EuclidLargeMocksXXXX_Rot30degCircle_m3_z0p9-1p1_Correlation_AUTO_2DPOL.fits`.
     n_elements : int
         Expected number of rows (data points) in each FITS table.
+    kind : str
+        Type of data to read; must be either "measured" or "correct". This
+        determines the folder pattern to search for.
+    z_bin : int
+        Flag for the redshift bin data to read. Must be one of `1, 2, 3, 4`.
 
     Returns
     -------
@@ -148,10 +155,32 @@ def readFITS_auto_series_SMU(base_path: str,
     mu_matrix = np.zeros((n_files, n_elements))
     xi_matrix = np.zeros((n_files, n_elements))
     
-    for i in range(0,n_files):
-        filepath = f"{base_path}/EUC_LE3_GCL_2PCF_EuclidLargeMocks{i+1:04d}_Rot30degCircle_m3_z0p9-1p1_Correlation_AUTO_2DPOL.fits"
-                                                                  # we need to have 000i not i
+    # check for kind to be either "measured" or "correct"
+    valid_kinds = ["measured", "correct"]
+    if kind not in valid_kinds:
+        raise ValueError(f"kind must be one of {valid_kinds}, got '{kind}'")
 
+    if z_bin == 1:
+        start = "EUC_LE3_GCL_2PCF_EuclidLargeMocks"
+        end = "Rot30degCircle_m3_z0p9-1p1_Correlation_AUTO_2DPOL.fits"
+
+    elif z_bin == 2:
+        start = "EUC_LE3_GCL_2PCF_EuclidLargeBox"
+        end = f"Rot30degCircle_z1.1-1.3-{kind}_Correlation_AUTO_2DPOL.fits"
+
+    elif z_bin == 3:
+        start = "EUC_LE3_GCL_2PCF_EuclidLargeBox"
+        end = f"Rot30degCircle_z1.3-1.5-{kind}_Correlation_AUTO_2DPOL.fits"
+
+    elif z_bin == 4:
+        start = "EUC_LE3_GCL_2PCF_EuclidLargeBox"
+        end = f"Rot30degCircle_z1.5-1.8-{kind}_Correlation_AUTO_2DPOL.fits"
+
+    for i in range(0,n_files):
+        
+        filepath = f"{base_path}/{start}{i+1:04d}_{end}"
+                                         # we need to have 000i not i
+        
         with fits.open(filepath) as hdul:
 
             table_hdu = hdul[1] # HDU 0 is an empty header that precedes the actual table
@@ -287,7 +316,9 @@ def readFITS_auto_series_RpPI(root_folder: str,
 
 def readFITS_pairs_series_SMU(base_path: str,
                               n_files: int,
-                              n_elements: int
+                              n_elements: int,
+                              kind: str = "measured",
+                              z_bin: int = 1
 ) -> Tuple[
     npt.NDArray[np.float64],
     npt.NDArray[np.float64],
@@ -313,6 +344,11 @@ def readFITS_pairs_series_SMU(base_path: str,
         `EUC_LE3_GCL_2PCF_EuclidLargeMocksXXXX_Rot30degCircle_m3_z0p9-1p1_PAIRS_AUTO_2DPOL.fits`.
     n_elements : int
         Expected number of rows (data points) in each FITS table.
+    kind : str
+        Type of data to read; must be either "measured" or "correct". This
+        determines the folder pattern to search for.
+    z_bin : int
+        Flag for the redshift bin data to read. Must be one of `1, 2, 3, 4`.
 
     Returns
     -------
@@ -358,9 +394,31 @@ def readFITS_pairs_series_SMU(base_path: str,
     Ndr_matrix = np.zeros((n_files, 1), dtype=np.float64)
     Nrr_matrix = np.zeros((n_files, 1), dtype=np.float64)
     
+    # check for kind to be either "measured" or "correct"
+    valid_kinds = ["measured", "correct"]
+    if kind not in valid_kinds:
+        raise ValueError(f"kind must be one of {valid_kinds}, got '{kind}'")
+
+    if z_bin == 1:
+        start = "EUC_LE3_GCL_2PCF_EuclidLargeMocks"
+        end = "Rot30degCircle_m3_z0p9-1p1_PAIRS_AUTO_2DPOL.fits"
+
+    elif z_bin == 2:
+        start = "EUC_LE3_GCL_2PCF_EuclidLargeBox"
+        end = f"Rot30degCircle_z1.1-1.3-{kind}_PAIRS_AUTO_2DPOL.fits"
+
+    elif z_bin == 3:
+        start = "EUC_LE3_GCL_2PCF_EuclidLargeBox"
+        end = f"Rot30degCircle_z1.3-1.5-{kind}_PAIRS_AUTO_2DPOL.fits"
+
+    elif z_bin == 4:
+        start = "EUC_LE3_GCL_2PCF_EuclidLargeBox"
+        end = f"Rot30degCircle_z1.5-1.8-{kind}_PAIRS_AUTO_2DPOL.fits"
+
     for i in range(0,n_files):
-        filepath = f"{base_path}/EUC_LE3_GCL_2PCF_EuclidLargeMocks{i+1:04d}_Rot30degCircle_m3_z0p9-1p1_PAIRS_AUTO_2DPOL.fits"
-                                                                  # we need to have 000i not i
+        
+        filepath = f"{base_path}/{start}{i+1:04d}_{end}"
+                                         # we need to have 000i not i
 
         with fits.open(filepath) as hdul:
 
@@ -386,7 +444,7 @@ def readFITS_pairs_series_SMU(base_path: str,
 
             else:
                 print(f"File {i+1}: {nData} points instead of {n_elements} and {nColumns} columns instead of 5")
-    
+
     return s_matrix, mu_matrix, dd_matrix, dr_matrix, rr_matrix, Ndd_matrix, Ndr_matrix, Nrr_matrix
 
 

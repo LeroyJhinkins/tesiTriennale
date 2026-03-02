@@ -4,6 +4,12 @@ temp/
 # data files (see archived mails to obtain them)
 data/
 
+# comet-emu files
+libs/comet-emu
+
+# LPT_emulator files -> download them here: https://eur02.safelinks.protection.outlook.com/?url=https%3A%2F%2Fmega.nz%2Ffile%2FxF8VRDyR%23Wx6dZk8g9l-h4G4Wg0AKg4MQAJjKZbzP6SP5aqlk9C0&data=05%7C02%7Candrea.inveninato%40studenti.unimi.it%7C0013179fc1174b7ad47e08de58d8242f%7C13b55eef70184674a3d7cc0db06d545c%7C0%7C0%7C639045882515246305%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7C%7C%7C&sdata=zvsNj3ceVlx5oeDpAGNbOD9vRKnJQFMyq4tnnKmW7fA%3D&reserved=0
+utils/LPT_emulator
+
 # LaTeX extra output
 *.aux
 *.fdb_latexmk
