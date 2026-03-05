@@ -6,10 +6,10 @@ ARCH=$(uname -m)
 
 if [[ "$ARCH" == "arm64" ]]; then
     echo "AppleSilicon-based Mac detected."
-    PYTHON_PATH=$(which python3.9)  # Usa direttamente Python ARM
+    PYTHON_PATH=$(which python3.11)  # Usa direttamente Python ARM
 elif [[ "$ARCH" == "x86_64" ]]; then
     echo "Intel-based Mac detected."
-    PYTHON_PATH=$(which python3.9)  # Usa direttamente Python Intel
+    PYTHON_PATH=$(which python3.11)  # Usa direttamente Python Intel
 else
     echo "Unknown architecture: $ARCH"
     exit 1
@@ -45,7 +45,7 @@ pip install -r utils/requirements.txt
 # Install the corrected comet-emu files
 if [ ! -d "libs/comet-emu" ]; then
     echo "\n>>> Cloning comet-emu into libs/..."
-    git clone git@gitlab.com:aegge/comet-emu.git libs/comet-emu
+    git clone https://gitlab.com/aegge/comet-emu.git libs/comet-emu
     
     echo ">>> Installing comet-emu..."
     pushd libs/comet-emu > /dev/null

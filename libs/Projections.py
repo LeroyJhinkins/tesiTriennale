@@ -387,10 +387,11 @@ def plot_multipoles_ratio(l_values: npt.NDArray[np.int8],
                           base_path: str,
                           err_multipoles_ratio: Optional[npt.NDArray[np.float64]] = None,
                           xlim: Optional[Tuple[float, float]] = None,
-                          ylim: Optional[Tuple[float, float]] = None
+                          ylim: Optional[Tuple[float, float]] = None,
+                          yref: float = (1-0.16)**2
 ) -> None:
     """
-    Plot the ratio of measured to corrected multipole of the correlation
+    Plot the ratio of measured to correct multipole of the correlation
     function as a function of separation s, optionally
     errors, and save the figure to file.
 
@@ -414,6 +415,10 @@ def plot_multipoles_ratio(l_values: npt.NDArray[np.int8],
         Limits for the x-axis of the plot.
     ylim : tuple of float, optional
         Limits for the y-axis of the plot.
+    yref : float, optional
+        Expected value of the ratio of measured to correct multipole. It's defined as `(1-f)^2`,
+        where `f` is the fraction of the number of interlopers relative to the unity.
+        Default is for the first redshift bin.
 
     Returns
     -------
@@ -423,6 +428,8 @@ def plot_multipoles_ratio(l_values: npt.NDArray[np.int8],
     """
 
     plt.figure(figsize=(8, 8), num="Ratio multipole plot")
+
+    plt.axhline(y=yref, color='grey', linestyle='-', linewidth=1.0, alpha=0.8, zorder=0)
 
     for j, l in enumerate(l_values):
 
@@ -438,7 +445,7 @@ def plot_multipoles_ratio(l_values: npt.NDArray[np.int8],
         plt.errorbar(s_unique, y, yerr=err_y, label=label, linestyle='--', linewidth=1.0, marker='o', markersize=3, capsize=1, elinewidth=0.6)
 
     plt.title("Ratio multipoles")
-        
+
     plt.xlabel(r'$s \,[h^{-1} \, \mathrm{Mpc}]$')
     plt.ylabel(fr'$\frac{{\xi_\ell^{{\mathrm{{measured}}}}}}{{\xi_\ell^{{\mathrm{{correct}}}}}}$')
 
@@ -690,7 +697,8 @@ def plot_clusteringWedges_ratio(n_wedges: int,
                                 base_path: str,
                                 err_wedges_ratio: Optional[npt.NDArray[np.float64]] = None,
                                 xlim: Optional[Tuple[float, float]] = None,
-                                ylim: Optional[Tuple[float, float]] = None
+                                ylim: Optional[Tuple[float, float]] = None,
+                                yref: float = (1-0.16)**2
 ) -> None:
     """
     Plot the ratio between measured and correct clustering wedges
@@ -714,6 +722,10 @@ def plot_clusteringWedges_ratio(n_wedges: int,
         Limits for the x-axis of the plot.
     ylim : tuple of float, optional
         Limits for the y-axis of the plot.
+    yref : float, optional
+        Expected value of the ratio of measured to correct multipole. It's defined as `(1-f)^2`,
+        where `f` is the fraction of the number of interlopers relative to the unity.
+        Default is for the first redshift bin.
 
     Returns
     -------
@@ -725,6 +737,8 @@ def plot_clusteringWedges_ratio(n_wedges: int,
     mu_edges = np.linspace(0.0, 1.0, n_wedges + 1)
 
     plt.figure(figsize=(8, 8), num="Ratio Measured VS Correct")
+
+    plt.axhline(y=yref, color='grey', linestyle='-', linewidth=1.0, alpha=0.8, zorder=0)
 
     for w in range(n_wedges):
 
@@ -1314,7 +1328,8 @@ def plot_projectedFunction_ratio(rp_unique: npt.NDArray[np.float64],
                                  base_path: str,
                                  err_wp_ratio: Optional[npt.NDArray[np.float64]] = None,
                                  xlim: Optional[Tuple[float, float]] = None,
-                                 ylim: Optional[Tuple[float, float]] = None
+                                 ylim: Optional[Tuple[float, float]] = None,
+                                 yref: float = (1-0.16)**2
 ) -> None:
     """
     Plot the ratio between measured and correct projected function
@@ -1336,6 +1351,10 @@ def plot_projectedFunction_ratio(rp_unique: npt.NDArray[np.float64],
         Limits for the x-axis of the plot.
     ylim : tuple of float, optional
         Limits for the y-axis of the plot.
+    yref : float, optional
+        Expected value of the ratio of measured to correct multipole. It's defined as `(1-f)^2`,
+        where `f` is the fraction of the number of interlopers relative to the unity.
+        Default is for the first redshift bin.
 
     Returns
     -------
@@ -1346,7 +1365,8 @@ def plot_projectedFunction_ratio(rp_unique: npt.NDArray[np.float64],
 
     plt.figure(figsize=(8, 8), num="Ratio Measured VS Correct")
 
-    
+    plt.axhline(y=yref, color='grey', linestyle='-', linewidth=1.0, alpha=0.8, zorder=0)
+
     label = r"$\frac{w_\mathrm{p}^\mathrm{measured}}{w_\mathrm{p}^\mathrm{correct}}$"
 
     plt.errorbar(rp_unique, wp_ratio, yerr=err_wp_ratio, label=label, linestyle='--', linewidth=1.0, marker='o', markersize=3, capsize=1, elinewidth=0.6)

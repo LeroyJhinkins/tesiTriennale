@@ -17,12 +17,17 @@ except ImportError:
 matplotlib.rcParams['toolbar'] = 'None' # disabling window bars
 
 
-# read FITS files -----------------------------------------------------------------------------------------------------------------
+# redshift bin to read ------------------------------------------------------------------------------------------------------------
 redshift_bin = int(sys.argv[1])
 valid_bins = [1,2,3,4]
 if redshift_bin not in valid_bins:
     raise ValueError(f"Please declare redshift bin to read, must be one of {valid_bins}, got {redshift_bin}")
 
+f_array = [0.16, 0.23, 0.25, 0.14] # found in Ilaria's paper
+f = f_array[redshift_bin - 1] # interlopers fraction for the given redshift bin
+
+
+# read FITS files -----------------------------------------------------------------------------------------------------------------
 nFiles = 1000
 nElements = 40000
 
@@ -45,6 +50,7 @@ s_matrix_corr, mu_matrix_corr, dd_matrix_corr, dr_matrix_corr, rr_matrix_corr, N
         "correct",
         redshift_bin
     )
+
 
 # this is for the errors: std computes the error of the single measure,
 # but, we when we do more realisations, we actually need to compute the error of the mean = error / sqrt(nFiles)
@@ -262,11 +268,12 @@ wedgesStd_ratio_reb = wedges_ratio_all_reb.std(axis=0, ddof=1) * normaliz # and 
 
 # covariance matrices
 # reorder to (nFiles, nWedges * n_s_unique) in order to get the full covariance matrix
-wedges_measured_all_reb_flatten = wedges_measured_all_reb.reshape(nFiles, nWedges * len(s_unique_reb))
-wedges_correct_all_reb_flatten = wedges_correct_all_reb.reshape(nFiles, nWedges * len(s_unique_reb))
+n_s_unique = len(s_unique_reb)
+wedges_measured_all_reb_flatten = wedges_measured_all_reb.reshape(nFiles, nWedges * n_s_unique)
+wedges_correct_all_reb_flatten = wedges_correct_all_reb.reshape(nFiles, nWedges * n_s_unique)
 
-wedgesCov_measured_reb = np.cov(wedges_measured_all_reb_flatten, rowvar=False) # (n_l_values * n_s_unique, n_l_values * n_s_unique)
-wedgesCov_correct_reb = np.cov(wedges_correct_all_reb_flatten, rowvar=False) # (n_l_values * n_s_unique, n_l_values * n_s_unique)
+wedgesCov_measured_reb = np.cov(wedges_measured_all_reb_flatten, rowvar=False) # (nWedges * n_s_unique, nWedges * n_s_unique)
+wedgesCov_correct_reb = np.cov(wedges_correct_all_reb_flatten, rowvar=False) # (nWedges * n_s_unique, nWedges * n_s_unique)
 
 s_wedges_reb = np.tile(s_unique_reb, nWedges)
 
@@ -311,7 +318,8 @@ prj.plot_clusteringWedges_ratio(
     wedges_ratio= wedgesMean_ratio_reb,
     err_wedges_ratio= wedgesStd_ratio_reb,
     base_path= f"graphs/z{redshift_bin}_rebin",
-    ylim=(0,2)
+    ylim=(0.25,1.25),
+    yref= (1-f)**2
 )
 
 # BAO peak finding
@@ -432,8 +440,8 @@ multipolesStd_ratio_reb = multipoles_ratio_all_reb.std(axis=0, ddof=1) * normali
 
 # covariance matrices
 # reorder to (nFiles, n_l_values * n_s_unique) in order to get the full covariance matrix
-multipoles_measured_all_reb_flatten = np.transpose(multipoles_measured_all_reb, (0, 2, 1)).reshape(nFiles, len(lValues) * len(s_unique_reb))
-multipoles_correct_all_reb_flatten = np.transpose(multipoles_correct_all_reb, (0, 2, 1)).reshape(nFiles, len(lValues) * len(s_unique_reb))
+multipoles_measured_all_reb_flatten = np.transpose(multipoles_measured_all_reb, (0, 2, 1)).reshape(nFiles, len(lValues) * n_s_unique)
+multipoles_correct_all_reb_flatten = np.transpose(multipoles_correct_all_reb, (0, 2, 1)).reshape(nFiles, len(lValues) * n_s_unique)
 
 multipolesCov_measured_reb = np.cov(multipoles_measured_all_reb_flatten, rowvar=False) # (n_l_values * n_s_unique, n_l_values * n_s_unique)
 multipolesCov_correct_reb = np.cov(multipoles_correct_all_reb_flatten, rowvar=False) # (n_l_values * n_s_unique, n_l_values * n_s_unique)
@@ -504,12 +512,13 @@ prj.plot_multipoles_measVScorr(
 )
 
 prj.plot_multipoles_ratio(
-    l_values= lValues,
+    l_values= np.array([0,2]),
     s_unique= s_unique_reb,
     multipoles_ratio= multipolesMean_ratio_reb,
     err_multipoles_ratio= multipolesStd_ratio_reb,
     base_path= f"graphs/z{redshift_bin}_rebin",
-    ylim= (0,2)
+    ylim= (0.25,1.25),
+    yref= (1-f)**2
 )
 
 
@@ -517,9 +526,9 @@ prj.plot_multipoles_ratio(
 np.save(f"outData/z{redshift_bin}_rebin/s_unique_reb.npy", s_unique_reb)
 
 np.save(f"outData/z{redshift_bin}_rebin/mean_wedges_measured.npy", wedgesMean_measured_reb[0])
-np.save(f"outData/z{redshift_bin}_rebin/cov_wedges_measured.npy", wedgesCov_measured_reb[0])
+np.save(f"outData/z{redshift_bin}_rebin/cov_wedges_measured.npy", wedgesCov_measured_reb[0:n_s_unique, 0:n_s_unique])
 np.save(f"outData/z{redshift_bin}_rebin/mean_wedges_correct.npy", wedgesMean_correct_reb[0])
-np.save(f"outData/z{redshift_bin}_rebin/cov_wedges_correct.npy", wedgesCov_correct_reb[0])
+np.save(f"outData/z{redshift_bin}_rebin/cov_wedges_correct.npy", wedgesCov_correct_reb[0:n_s_unique, 0:n_s_unique])
 
 np.save(f"outData/z{redshift_bin}_rebin/mean_multipoles_measured.npy", multipoles_measured_all_reb_flatten.mean(axis=0))
 np.save(f"outData/z{redshift_bin}_rebin/cov_multipoles_measured.npy", multipolesCov_measured_reb)

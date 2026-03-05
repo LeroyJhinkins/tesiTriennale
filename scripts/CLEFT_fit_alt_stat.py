@@ -24,7 +24,7 @@ from nautilus import Sampler, Prior
 #-----------------------------
 
 class run_chain():
-    def __init__(self, what_model, smin, de_model='lambda', what_stat='multipoles', mu_edges=[0., 0.5], pi_max=60., multi_z=[1.0], what_cosmo='ELM', what_data='measured'):
+    def __init__(self, what_model, smin, de_model='lambda', what_stat='multipoles', mu_edges=[0., 0.5], pi_max=60., multi_bins=[1], what_cosmo='ELM', what_data='measured'):
         self.smin = smin
         self.de_model = de_model
 
@@ -35,10 +35,12 @@ class run_chain():
         self.ds = 5
         self.ns = int((self.smax-self.smin)/self.ds)
 
-        self.pool = 4
+        self.pool = 3
 
         # This determines how many redshifts should be fitted simulateneously
-        self.multi_z = multi_z
+        self.z_mean_array = [1.0, 1.2, 1.4, 1.65]
+        self.multi_bins = multi_bins
+        self.multi_z = [self.z_mean_array[z-1] for z in self.multi_bins]
         self.num_z = len(self.multi_z)
         self.multi_z_string = "_" + "_".join(str(num) for num in self.multi_z)
 
@@ -55,8 +57,8 @@ class run_chain():
             self.output_dir = f'chains/{self.what_model}_template/'
         else:
             self.output_dir = f'chains/{self.what_model}_{self.de_model}/'
-        self.cov_dir = [f'outData/z{int(num)}_rebin/' for num in self.multi_z]
-        self.data_dir = [f'outData/z{int(num)}_rebin/' for num in self.multi_z]
+        self.cov_dir = [f'outData/z{num}_rebin/' for num in self.multi_bins]
+        self.data_dir = [f'outData/z{num}_rebin/' for num in self.multi_bins]
         self.log_dir = 'logs/'
 
         self.full_set_up()
@@ -120,23 +122,23 @@ class run_chain():
 
         for counter, z in enumerate(self.multi_z):
             if self.de_model == None:
-                self.prior.add_parameter(f'f_z{int(z)}', dist=(0.5, 1.05))
-                self.prior.add_parameter(f's12_z{int(z)}', dist=(0.2, 1.0))
-                self.prior.add_parameter(f'q_lo_z{int(z)}', dist=(0.9, 1.1))
-                self.prior.add_parameter(f'q_tr_z{int(z)}', dist=(0.9, 1.1))
+                self.prior.add_parameter(f'f_z{counter+1}', dist=(0.5, 1.05))
+                self.prior.add_parameter(f's12_z{counter+1}', dist=(0.2, 1.0))
+                self.prior.add_parameter(f'q_lo_z{counter+1}', dist=(0.9, 1.1))
+                self.prior.add_parameter(f'q_tr_z{counter+1}', dist=(0.9, 1.1))
 
-            self.prior.add_parameter(f'b1_z{int(z)}', dist=(-0.5, 2.5))
+            self.prior.add_parameter(f'b1_z{counter+1}', dist=(-0.5, 2.5))
             if self.what_model == 'CLEFT':
-                self.prior.add_parameter(f'b2_z{int(z)}', dist=(-10.0, 10.0))
-                self.prior.add_parameter(f'bs_z{int(z)}', dist=(-20.0, 20.0))
-                self.prior.add_parameter(f'a_xi_z{int(z)}', dist=(-100., 200.))
-                self.prior.add_parameter(f'a_v_z{int(z)}', dist=(-100., 200.))
-                self.prior.add_parameter(f'a_s_z{int(z)}', dist=(-100., 200.))
+                self.prior.add_parameter(f'b2_z{counter+1}', dist=(-10.0, 10.0))
+                self.prior.add_parameter(f'bs_z{counter+1}', dist=(-20.0, 20.0))
+                self.prior.add_parameter(f'a_xi_z{counter+1}', dist=(-100., 200.))
+                self.prior.add_parameter(f'a_v_z{counter+1}', dist=(-100., 200.))
+                self.prior.add_parameter(f'a_s_z{counter+1}', dist=(-100., 200.))
             elif self.what_model == 'CLPT':
-                self.prior.add_parameter(f'b2_z{int(z)}', dist=(-10.0, 10.0))
-                self.prior.add_parameter(f'sig_v_z{int(z)}', dist=(0., 100.0))
+                self.prior.add_parameter(f'b2_z{counter+1}', dist=(-10.0, 10.0))
+                self.prior.add_parameter(f'sig_v_z{counter+1}', dist=(0., 100.0))
             elif self.what_model == 'ZA':
-                self.prior.add_parameter(f'sig_v_z{int(z)}', dist=(0., 100.0))
+                self.prior.add_parameter(f'sig_v_z{counter+1}', dist=(0., 100.0))
 
         self.sampler = Sampler(self.prior, self.likelihood, n_live=self.n_live, pool=self.pool, vectorized=False)
 
@@ -219,7 +221,7 @@ class run_chain():
 
         if self.what_stat == 'multipoles':
             if mode == "ELM":
-                s_ret = np.load(f"{self.data_dir}s_unique_reb.npy")
+                s_ret = np.load(f"{self.data_dir[0]}s_unique_reb.npy")
                 ns_tmp = len(s_ret)
                 xi0 = data[:ns_tmp]
                 xi2 = data[ns_tmp:2*ns_tmp]
@@ -239,7 +241,7 @@ class run_chain():
 
         elif self.what_stat == 'wedges':
             if mode == "ELM":
-                s_ret = np.load(f"{self.data_dir}s_unique_reb.npy")
+                s_ret = np.load(f"{self.data_dir[0]}s_unique_reb.npy")
                 ns_tmp = len(s_ret)
                 xi0 = data[:ns_tmp]
                 xi0 = xi0[(s_ret>self.smin) & (s_ret<self.smax)]
@@ -323,12 +325,13 @@ if __name__ == "__main__":
 
     model_arg = sys.argv[1]
     case_num = int(sys.argv[2])
-    data_type = sys.argv[3]
+    what_statistic = sys.argv[3]
+    data_type = sys.argv[4]
 
-    raw_bins = sys.argv[4]
-    redshift_bins = [float(num) for num in raw_bins.split(',')]
+    raw_bins = sys.argv[5]
+    redshift_bins = [int(num) for num in raw_bins.split(',')]
 
-    the_chain = run_chain(model_arg, cases[case_num][0], cases[case_num][1], what_stat='multipoles', multi_z=redshift_bins, what_data=data_type)
+    the_chain = run_chain(model_arg, cases[case_num][0], cases[case_num][1], what_stat=what_statistic, multi_bins=redshift_bins, what_data=data_type)
 
     #the_chain.test()
     the_chain.full_run()
