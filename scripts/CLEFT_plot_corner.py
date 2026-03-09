@@ -53,11 +53,11 @@ for z in redshift_bins:
     g.subplots[2,0].axhline(0.271*0.67**2, color='grey', linestyle='--', lw=2) # type: ignore
     g.subplots[2,1].axhline(0.271*0.67**2, color='grey', linestyle='--', lw=2) # type: ignore
 
-    for counter_ax in range(1,9):
+    for counter_ax in range(1,len(params_list_full)):
         g.subplots[counter_ax,0].axvline(0.67, color='grey', linestyle='--', lw=2) # type: ignore
-    for counter_ax in range(2,9):
+    for counter_ax in range(2,len(params_list_full)):
         g.subplots[counter_ax,1].axvline(2.11065, color='grey', linestyle='--', lw=2) # type: ignore
-    for counter_ax in range(3,9):
+    for counter_ax in range(3,len(params_list_full)):
         g.subplots[counter_ax,2].axvline(0.271*0.67**2, color='grey', linestyle='--', lw=2) # type: ignore
 
 
