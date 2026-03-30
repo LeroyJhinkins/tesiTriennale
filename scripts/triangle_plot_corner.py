@@ -31,7 +31,7 @@ elif model == 'CLPT':
 
 params_cosmo = [r"$h$", r"$A_s$", r"$\omega_c$"]
 truths = {r"$h$": 0.67, r"$A_s$": 2.11065, r"$\omega_c$": 0.271*0.67**2}
-scale = {r"$h$": [0.6, 0.8], r"$A_s$": [1.2, 3.0], r"$\omega_c$": [0.085, 0.155]}
+scale = {r"$h$": [0.63, 0.715], r"$A_s$": [1.2, 3.0], r"$\omega_c$": [0.09, 0.155]}
 
 path_1 = f'chains/{model}_lambda/chain_{model}-z_{z_mean_array[redshift_bins[0]-1]}-smin{smin}-de_model_lambda-cov_it_2-what_stat_{what_stat}_nlive1000_pool_3_newcode_{data_type}.txt'
 data_1 = np.loadtxt(path_1)
