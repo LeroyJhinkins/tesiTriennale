@@ -113,7 +113,7 @@ class run_chain():
     def set_up_sampler(self):
         self.prior = Prior()
 
-        self.n_live = 3000 # This needs to be changed to 5000
+        self.n_live = 5000 # This needs to be changed to 5000
 
         if self.de_model != None:
             self.prior.add_parameter(f'h', dist=(0.6, 0.8))
