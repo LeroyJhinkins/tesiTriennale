@@ -209,8 +209,12 @@ class run_chain():
             s_3l = s_raw # Currently supports only one wedge 
             s_3l_2D_xx, s_3l_2D_yy = np.meshgrid(s_3l, s_3l, indexing='ij') # This gives us the two matrices containing the respective s_bins of the covariances
             cut_cov = data_cov[((s_3l_2D_xx > self.smin) & (s_3l_2D_xx < self.smax)) & ((s_3l_2D_yy > self.smin) & (s_3l_2D_yy < self.smax))].reshape(num_tot, num_tot) / 5.06617801 # Divide by 1000. because we fit the mean of 1000. realisations
+ 
+        n_bins = len(cut_cov[0,:])
+        n_mocks = 1000
+        hp = 1 - (n_bins + 1)/(n_mocks - 1) # Hartlap factor
+        icov_ret = inv(cut_cov) * hp
 
-        icov_ret = inv(cut_cov)
         return icov_ret
 
     def _data_cutting(self, data_name, mode='ELM'):
