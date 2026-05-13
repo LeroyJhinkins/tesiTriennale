@@ -35,7 +35,7 @@ class run_chain():
         self.ds = 5
         self.ns = int((self.smax-self.smin)/self.ds)
 
-        self.pool = 3
+        self.pool = 10
 
         # This determines how many redshifts should be fitted simulateneously
         self.z_mean_array = [1.0, 1.2, 1.4, 1.65]

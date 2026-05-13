@@ -20,6 +20,8 @@ data_type = sys.argv[4]
 raw_bins = sys.argv[5]
 redshift_bins = [int(num) for num in raw_bins.split(',')]
 
+isCluster = True
+
 z_mean_array = [1.0, 1.2, 1.4, 1.65]
 
 if model == 'CLEFT':
@@ -31,7 +33,10 @@ truths = {r"$h$": 0.67, r"$A_s$": 2.11065, r"$\omega_c$": 0.271*0.67**2}
 
 for z in redshift_bins:
     z_mean = z_mean_array[z - 1]
-    name_1 = f'chains/{model}_lambda/chain_{model}-z_{z_mean}-smin{smin}-de_model_lambda-cov_it_2-what_stat_{what_stat}_nlive1000_pool_3_newcode_{data_type}.txt'
+    if isCluster:
+        name_1 = f'chains/{model}_lambda/chain_{model}-z_{z_mean}-smin{smin}-de_model_lambda-cov_it_2-what_stat_{what_stat}_nlive5000_pool_10_newcode_{data_type}.txt'
+    else:
+        name_1 = f'chains/{model}_lambda/chain_{model}-z_{z_mean}-smin{smin}-de_model_lambda-cov_it_2-what_stat_{what_stat}_nlive1000_pool_3_newcode_{data_type}.txt'
 
     loaded_samples = np.loadtxt(name_1)
     sample1 = MCSamples(samples=loaded_samples[:,2:], weights=loaded_samples[:,0], names=params_list_full)
@@ -56,5 +61,9 @@ for z in redshift_bins:
         line_args=[{'lw':2, 'color':'tab:purple'},{'lw':2, 'color':'tab:blue'},{'lw':2, 'color':'tab:green'}]
     )
 
-    out = f"graphs/z{z}_rebin/ELM_contours_{model}_smin_{smin}_{what_stat}_{data_type}.pdf"
+    if isCluster:
+        out = f"graphs/z{z}_rebin/cluster/ELM_contours_{model}_smin_{smin}_{what_stat}_{data_type}.pdf"
+    else:
+        out = f"graphs/z{z}_rebin/ELM_contours_{model}_smin_{smin}_{what_stat}_{data_type}.pdf"
+
     g.export(out)

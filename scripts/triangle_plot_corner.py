@@ -22,6 +22,8 @@ redshift_bins = [int(num) for num in raw_bins.split(',')]
 if len(redshift_bins) != 2:
     raise RuntimeError(f"{len(redshift_bins)} redshift bins given... Must give 2")
 
+isCluster = True
+
 z_mean_array = [1.0, 1.2, 1.4, 1.65]
 
 if model == 'CLEFT':
@@ -33,12 +35,18 @@ params_cosmo = [r"$h$", r"$A_s$", r"$\omega_c$"]
 truths = {r"$h$": 0.67, r"$A_s$": 2.11065, r"$\omega_c$": 0.271*0.67**2}
 scale = {r"$h$": [0.63, 0.715], r"$A_s$": [1.2, 3.0], r"$\omega_c$": [0.09, 0.155]}
 
-path_1 = f'chains/{model}_lambda/chain_{model}-z_{z_mean_array[redshift_bins[0]-1]}-smin{smin}-de_model_lambda-cov_it_2-what_stat_{what_stat}_nlive1000_pool_3_newcode_{data_type}.txt'
+if isCluster:
+    path_1 = f'chains/{model}_lambda/chain_{model}-z_{z_mean_array[redshift_bins[0]-1]}-smin{smin}-de_model_lambda-cov_it_2-what_stat_{what_stat}_nlive5000_pool_10_newcode_{data_type}.txt'
+else:
+    path_1 = f'chains/{model}_lambda/chain_{model}-z_{z_mean_array[redshift_bins[0]-1]}-smin{smin}-de_model_lambda-cov_it_2-what_stat_{what_stat}_nlive1000_pool_3_newcode_{data_type}.txt'
 data_1 = np.loadtxt(path_1)
 sample_1 = MCSamples(samples=data_1[:,2:], weights=data_1[:,0], names=params_list_full)
 sample_1.updateSettings({'contours': [0.68, 0.95]})
+if isCluster:
+    path_2 = f'chains/{model}_lambda/chain_{model}-z_{z_mean_array[redshift_bins[1]-1]}-smin{smin}-de_model_lambda-cov_it_2-what_stat_{what_stat}_nlive5000_pool_10_newcode_{data_type}.txt'
+else:
+    path_2 = f'chains/{model}_lambda/chain_{model}-z_{z_mean_array[redshift_bins[1]-1]}-smin{smin}-de_model_lambda-cov_it_2-what_stat_{what_stat}_nlive1000_pool_3_newcode_{data_type}.txt'
 
-path_2 = f'chains/{model}_lambda/chain_{model}-z_{z_mean_array[redshift_bins[1]-1]}-smin{smin}-de_model_lambda-cov_it_2-what_stat_{what_stat}_nlive1000_pool_3_newcode_{data_type}.txt'
 data_2 = np.loadtxt(path_2)
 sample_2 = MCSamples(samples=data_2[:,2:], weights=data_2[:,0], names=params_list_full)
 sample_2.updateSettings({'contours': [0.68, 0.95]})
@@ -61,5 +69,8 @@ g.triangle_plot(
     line_args=[{'lw':1.5, 'color':'tab:red'}, {'lw':1.5, 'color':'tab:blue'}],
 )
 
-out = f"graphs/z{redshift_bins[0]}_rebin/ELM_contours_{model}_z{redshift_bins[0]}_vs_z{redshift_bins[1]}_smin_{smin}_{what_stat}_{data_type}.pdf"
+if isCluster:
+    out = f"graphs/z{redshift_bins[0]}_rebin/cluster/ELM_contours_{model}_z{redshift_bins[0]}_vs_z{redshift_bins[1]}_smin_{smin}_{what_stat}_{data_type}.pdf"
+else:
+    out = f"graphs/z{redshift_bins[0]}_rebin/ELM_contours_{model}_z{redshift_bins[0]}_vs_z{redshift_bins[1]}_smin_{smin}_{what_stat}_{data_type}.pdf"
 g.export(out)
