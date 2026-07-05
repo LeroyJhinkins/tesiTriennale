@@ -19,8 +19,7 @@ what_stat = sys.argv[3]
 data_type = sys.argv[4]
 raw_bins = sys.argv[5]
 redshift_bins = [int(num) for num in raw_bins.split(',')]
-
-isCluster = True
+isCluster = bool(int(sys.argv[6]))
 
 z_mean_array = [1.0, 1.2, 1.4, 1.65]
 
@@ -28,6 +27,17 @@ if model == 'CLEFT':
     params_list_full = [r"$h$", r"$A_s$", r"$\omega_c$", r"$b_1$", r"$b_2$", r"$bs2$", r"$a_x$", r"$a_v$", r"$a_s$"]
 elif model == 'CLPT':
     params_list_full = [r"$h$", r"$A_s$", r"$\omega_c$", r"$b_1$", r"$b_2$", r"$\sigma_v$"]
+
+if what_stat == 'multipoles':
+    if data_type == 'measured':
+        color = '#E31A1C'
+    else:
+        color = '#252525'
+else:
+    if data_type == 'measured':
+        color = '#1F78B4'
+    else:
+        color = '#33A02C'
 
 truths = {r"$h$": 0.67, r"$A_s$": 2.11065, r"$\omega_c$": 0.271*0.67**2}
 
@@ -54,11 +64,11 @@ for z in redshift_bins:
         [sample1],
         params_list_full,
         markers= truths,
-        marker_args = {'lw': 1.5, 'color': 'grey', 'linestyle': '--'},
-        contour_colors=['tab:red', 'tab:blue', 'tab:green'],
+        marker_args = {'lw': 1.5, 'color': '#404040', 'linestyle': '--'},
+        contour_colors=[color],
         filled=True,
         legend_labels=[f'{model} {what_stat} {data_type}: smin {smin}'],
-        line_args=[{'lw':2, 'color':'tab:purple'},{'lw':2, 'color':'tab:blue'},{'lw':2, 'color':'tab:green'}]
+        line_args=[{'lw':2, 'color':color}]
     )
 
     if isCluster:

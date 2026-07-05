@@ -17,6 +17,7 @@ utils/LPT_emulator
 *.out
 *.synctex.gz
 *.log
+*.toc
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

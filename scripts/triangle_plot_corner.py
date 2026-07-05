@@ -21,8 +21,7 @@ raw_bins = sys.argv[5]
 redshift_bins = [int(num) for num in raw_bins.split(',')]
 if len(redshift_bins) != 2:
     raise RuntimeError(f"{len(redshift_bins)} redshift bins given... Must give 2")
-
-isCluster = True
+isCluster = bool(int(sys.argv[6]))
 
 z_mean_array = [1.0, 1.2, 1.4, 1.65]
 
@@ -42,11 +41,11 @@ else:
 data_1 = np.loadtxt(path_1)
 sample_1 = MCSamples(samples=data_1[:,2:], weights=data_1[:,0], names=params_list_full)
 sample_1.updateSettings({'contours': [0.68, 0.95]})
+
 if isCluster:
     path_2 = f'chains/{model}_lambda/chain_{model}-z_{z_mean_array[redshift_bins[1]-1]}-smin{smin}-de_model_lambda-cov_it_2-what_stat_{what_stat}_nlive5000_pool_10_newcode_{data_type}.txt'
 else:
     path_2 = f'chains/{model}_lambda/chain_{model}-z_{z_mean_array[redshift_bins[1]-1]}-smin{smin}-de_model_lambda-cov_it_2-what_stat_{what_stat}_nlive1000_pool_3_newcode_{data_type}.txt'
-
 data_2 = np.loadtxt(path_2)
 sample_2 = MCSamples(samples=data_2[:,2:], weights=data_2[:,0], names=params_list_full)
 sample_2.updateSettings({'contours': [0.68, 0.95]})
