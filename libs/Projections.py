@@ -179,8 +179,9 @@ def plot_multipoles(l_values: npt.NDArray[np.int8],
 
     plt.title("Multipoles")
     
-    plt.xlabel(r'$s \,[h^{-1} \, \mathrm{Mpc}]$')
-    plt.ylabel(fr'$s^2 \xi_\ell \,[h^{{-2}} \, \mathrm{{Mpc}}^2]$')
+    plt.xlabel(r'$s \,[h^{-1} \, \mathrm{Mpc}]$', fontsize=30)
+    plt.ylabel(fr'$s^2 \xi_\ell \,[h^{{-2}} \, \mathrm{{Mpc}}^2]$', fontsize=30)
+    plt.tick_params(axis='both', which='major', labelsize=20)
 
     if xlim is not None:
         plt.xlim(xlim)
@@ -188,7 +189,7 @@ def plot_multipoles(l_values: npt.NDArray[np.int8],
     if ylim is not None:
         plt.ylim(ylim)
 
-    plt.legend()
+    plt.legend(fontsize=15)
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
     
@@ -275,8 +276,9 @@ def plot_multipoles_rebinVSnot(l_values: npt.NDArray[np.int8],
 
     plt.title("Multipoles Rebin VS Not rebin")
     
-    plt.xlabel(r'$s \,[h^{-1} \, \mathrm{Mpc}]$')
-    plt.ylabel(fr'$s^2 \xi_\ell \,[h^{{-2}} \, \mathrm{{Mpc}}^2]$')
+    plt.xlabel(r'$s \,[h^{-1} \, \mathrm{Mpc}]$', fontsize=30)
+    plt.ylabel(fr'$s^2 \xi_\ell \,[h^{{-2}} \, \mathrm{{Mpc}}^2]$', fontsize=30)
+    plt.tick_params(axis='both', which='major', labelsize=20)
 
     if xlim is not None:
         plt.xlim(xlim)
@@ -284,7 +286,7 @@ def plot_multipoles_rebinVSnot(l_values: npt.NDArray[np.int8],
     if ylim is not None:
         plt.ylim(ylim)
 
-    plt.legend()
+    plt.legend(fontsize=15)
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
     
@@ -365,8 +367,9 @@ def plot_multipoles_measVScorr(l_values: npt.NDArray[np.int8],
 
     plt.title("Multipoles Measured VS Correct")
     
-    plt.xlabel(r'$s \,[h^{-1} \, \mathrm{Mpc}]$')
-    plt.ylabel(fr'$s^2 \xi_\ell \,[h^{{-2}} \, \mathrm{{Mpc}}^2]$')
+    plt.xlabel(r'$s \,[h^{-1} \, \mathrm{Mpc}]$', fontsize=30)
+    plt.ylabel(fr'$s^2 \xi_\ell \,[h^{{-2}} \, \mathrm{{Mpc}}^2]$', fontsize=30)
+    plt.tick_params(axis='both', which='major', labelsize=20)
 
     if xlim is not None:
         plt.xlim(xlim)
@@ -374,7 +377,7 @@ def plot_multipoles_measVScorr(l_values: npt.NDArray[np.int8],
     if ylim is not None:
         plt.ylim(ylim)
 
-    plt.legend()
+    plt.legend(fontsize=15)
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
     
@@ -446,8 +449,9 @@ def plot_multipoles_ratio(l_values: npt.NDArray[np.int8],
 
     plt.title("Ratio multipoles")
 
-    plt.xlabel(r'$s \,[h^{-1} \, \mathrm{Mpc}]$')
-    plt.ylabel(fr'$\frac{{\xi_\ell^{{\mathrm{{measured}}}}}}{{\xi_\ell^{{\mathrm{{correct}}}}}}$')
+    plt.xlabel(r'$s \,[h^{-1} \, \mathrm{Mpc}]$', fontsize=30)
+    plt.ylabel(fr'$\frac{{\xi_\ell^{{\mathrm{{measured}}}}}}{{\xi_\ell^{{\mathrm{{correct}}}}}}$', fontsize=30)
+    plt.tick_params(axis='both', which='major', labelsize=20)
 
     if xlim is not None:
         plt.xlim(xlim)
@@ -455,7 +459,7 @@ def plot_multipoles_ratio(l_values: npt.NDArray[np.int8],
     if ylim is not None:
         plt.ylim(ylim)
 
-    plt.legend()
+    plt.legend(fontsize=15)
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
     
@@ -584,8 +588,9 @@ def plot_clusteringWedges(n_wedges: int,
 
     plt.title(f"{n_wedges} clustering wedges")
     
-    plt.xlabel(r'$s \,[h^{-1} \, \mathrm{Mpc}]$')
-    plt.ylabel(r'$s^2 \xi \,[h^{-2} \, \mathrm{Mpc}^2]$')
+    plt.xlabel(r'$s \,[h^{-1} \, \mathrm{Mpc}]$', fontsize=30)
+    plt.ylabel(r'$s^2 \xi \,[h^{-2} \, \mathrm{Mpc}^2]$', fontsize=30)
+    plt.tick_params(axis='both', which='major', labelsize=20)
 
     if xlim is not None:
         plt.xlim(xlim)
@@ -593,7 +598,7 @@ def plot_clusteringWedges(n_wedges: int,
     if ylim is not None:
         plt.ylim(ylim)
 
-    plt.legend()
+    plt.legend(fontsize=15)
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
     
@@ -675,8 +680,9 @@ def plot_clusteringWedges_measVScorr(n_wedges: int,
 
     plt.title(f"{n_wedges} clustering wedges Measured VS Correct")
     
-    plt.xlabel(r'$s \,[h^{-1} \, \mathrm{Mpc}]$')
-    plt.ylabel(r'$s^2 \xi \,[h^{-2} \, \mathrm{Mpc}^2]$')
+    plt.xlabel(r'$s \,[h^{-1} \, \mathrm{Mpc}]$', fontsize=30)
+    plt.ylabel(r'$s^2 \xi \,[h^{-2} \, \mathrm{Mpc}^2]$', fontsize=30)
+    plt.tick_params(axis='both', which='major', labelsize=20)
 
     if xlim is not None:
         plt.xlim(xlim)
@@ -684,7 +690,7 @@ def plot_clusteringWedges_measVScorr(n_wedges: int,
     if ylim is not None:
         plt.ylim(ylim)
 
-    plt.legend()
+    plt.legend(fontsize=15)
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
     
@@ -758,8 +764,9 @@ def plot_clusteringWedges_ratio(n_wedges: int,
 
     plt.title(f"{n_wedges} clustering wedges ratio")
 
-    plt.xlabel(r'$s \,[h^{-1} \, \mathrm{Mpc}]$')
-    plt.ylabel(r'$\frac{\xi^\mathrm{measured}}{\xi^\mathrm{correct}}$')
+    plt.xlabel(r'$s \,[h^{-1} \, \mathrm{Mpc}]$', fontsize=30)
+    plt.ylabel(r'$\frac{\xi^\mathrm{measured}}{\xi^\mathrm{correct}}$', fontsize=30)
+    plt.tick_params(axis='both', which='major', labelsize=20)
     
     if xlim is not None:
         plt.xlim(xlim)
@@ -767,7 +774,7 @@ def plot_clusteringWedges_ratio(n_wedges: int,
     if ylim is not None:
         plt.ylim(ylim) # this is necessary because when wedge_correct is near 0, the ratio explodes => so we limit the plot on y-axis
 
-    plt.legend()
+    plt.legend(fontsize=15)
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
 
@@ -1025,8 +1032,9 @@ def compute_muMax(s_matrix: npt.NDArray[np.float64],
             label=fr"$\xi_{{[0,{mu_max}]}}$"
         )
 
-    plt.xlabel(r'$s \,[h^{-1} \, \mathrm{Mpc}]$')
-    plt.ylabel(fr'$s^2 \xi \,[h^{{-2}} \, \mathrm{{Mpc}}^2]$')
+    plt.xlabel(r'$s \,[h^{-1} \, \mathrm{Mpc}]$', fontsize=30)
+    plt.ylabel(fr'$s^2 \xi \,[h^{{-2}} \, \mathrm{{Mpc}}^2]$', fontsize=30)
+    plt.tick_params(axis='both', which='major', labelsize=20)
     plt.title("Scale dependance")
 
     if xlim is not None:
@@ -1035,7 +1043,7 @@ def compute_muMax(s_matrix: npt.NDArray[np.float64],
     if ylim is not None:
         plt.ylim(ylim)
 
-    plt.legend()
+    plt.legend(fontsize=15)
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
 
@@ -1135,8 +1143,9 @@ def compute_muMax_ratio(s_matrix: npt.NDArray[np.float64],
             label=fr"$\frac{{\xi^\mathrm{{measured}}}}{{\xi^\mathrm{{correct}}}}([0,{mu_max}])$"
         )
 
-    plt.xlabel(r'$s \,[h^{-1} \, \mathrm{Mpc}]$')
-    plt.ylabel(fr'$\frac{{\xi^\mathrm{{measured}}}}{{\xi^\mathrm{{correct}}}}$')
+    plt.xlabel(r'$s \,[h^{-1} \, \mathrm{Mpc}]$', fontsize=30)
+    plt.ylabel(fr'$\frac{{\xi^\mathrm{{measured}}}}{{\xi^\mathrm{{correct}}}}$', fontsize=30)
+    plt.tick_params(axis='both', which='major', labelsize=20)
     plt.title("Scale dependance")
 
     if xlim is not None:
@@ -1145,7 +1154,7 @@ def compute_muMax_ratio(s_matrix: npt.NDArray[np.float64],
     if ylim is not None:
         plt.ylim(ylim)
 
-    plt.legend()
+    plt.legend(fontsize=15)
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
 
@@ -1238,8 +1247,9 @@ def plot_projectedFunction(rp_unique: npt.NDArray[np.float64],
 
     plt.title(f"Projected function")
     
-    plt.xlabel(r'$r_\mathrm{p} \,[h^{-1} \, \mathrm{Mpc}]$')
-    plt.ylabel(r'$w_\mathrm{p}$')
+    plt.xlabel(r'$r_\mathrm{p} \,[h^{-1} \, \mathrm{Mpc}]$', fontsize=30)
+    plt.ylabel(r'$w_\mathrm{p}$', fontsize=30)
+    plt.tick_params(axis='both', which='major', labelsize=20)
 
     if xlim is not None:
         plt.xlim(xlim)
@@ -1247,7 +1257,7 @@ def plot_projectedFunction(rp_unique: npt.NDArray[np.float64],
     if ylim is not None:
         plt.ylim(ylim)
 
-    plt.legend()
+    plt.legend(fontsize=15)
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
     
@@ -1307,8 +1317,9 @@ def plot_projectedFunction_measVScorr(rp_unique: npt.NDArray[np.float64],
 
     plt.title(f"Projected function Measured VS Correct")
     
-    plt.xlabel(r'$r_\mathrm{p} \,[h^{-1} \, \mathrm{Mpc}]$')
-    plt.ylabel(r'$w_\mathrm{p}$')
+    plt.xlabel(r'$r_\mathrm{p} \,[h^{-1} \, \mathrm{Mpc}]$', fontsize=30)
+    plt.ylabel(r'$w_\mathrm{p}$', fontsize=30)
+    plt.tick_params(axis='both', which='major', labelsize=20)
 
     if xlim is not None:
         plt.xlim(xlim)
@@ -1316,7 +1327,7 @@ def plot_projectedFunction_measVScorr(rp_unique: npt.NDArray[np.float64],
     if ylim is not None:
         plt.ylim(ylim)
 
-    plt.legend()
+    plt.legend(fontsize=15)
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
     
@@ -1373,8 +1384,9 @@ def plot_projectedFunction_ratio(rp_unique: npt.NDArray[np.float64],
 
     plt.title(f"Projected function ratio")
 
-    plt.xlabel(r'$r_\mathrm{p} \,[h^{-1} \, \mathrm{Mpc}]$')
-    plt.ylabel(r'$\frac{w_\mathrm{p}^\mathrm{measured}}{w_\mathrm{p}^\mathrm{correct}}$')
+    plt.xlabel(r'$r_\mathrm{p} \,[h^{-1} \, \mathrm{Mpc}]$', fontsize=30)
+    plt.ylabel(r'$\frac{w_\mathrm{p}^\mathrm{measured}}{w_\mathrm{p}^\mathrm{correct}}$', fontsize=30)
+    plt.tick_params(axis='both', which='major', labelsize=20)
     
     if xlim is not None:
         plt.xlim(xlim)
@@ -1382,7 +1394,7 @@ def plot_projectedFunction_ratio(rp_unique: npt.NDArray[np.float64],
     if ylim is not None:
         plt.ylim(ylim) # this is necessary because when wedge_correct is near 0, the ratio explodes => so we limit the plot on y-axis
 
-    plt.legend()
+    plt.legend(fontsize=15)
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
 
@@ -1593,15 +1605,16 @@ def compute_piMax(rp_matrix: npt.NDArray[np.float64],
 
     plt.title("Scale dependance")
 
-    plt.xlabel(r'$r_\mathrm{p} \,[h^{-1} \, \mathrm{Mpc}]$')
-    plt.ylabel(fr'$r_\mathrm{{p}}^2 w_\mathrm{{p}}$')
+    plt.xlabel(r'$r_\mathrm{p} \,[h^{-1} \, \mathrm{Mpc}]$', fontsize=30)
+    plt.ylabel(fr'$r_\mathrm{{p}}^2 w_\mathrm{{p}}$', fontsize=30)
+    plt.tick_params(axis='both', which='major', labelsize=20)
 
     if xlim is not None:
         plt.xlim(xlim)
     if ylim is not None:
         plt.ylim(ylim)
 
-    plt.legend()
+    plt.legend(fontsize=15)
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
 
@@ -1700,15 +1713,16 @@ def compute_piMax_ratio(rp_matrix: npt.NDArray[np.float64],
 
     plt.title("Scale dependance")
 
-    plt.xlabel(r'$r_\mathrm{p} \,[h^{-1} \, \mathrm{Mpc}]$')
-    plt.ylabel(fr'$\frac{{w_\mathrm{{p}}^\mathrm{{measured}}}}{{w_{{p}}^\mathrm{{correct}}}}$')
+    plt.xlabel(r'$r_\mathrm{p} \,[h^{-1} \, \mathrm{Mpc}]$', fontsize=30)
+    plt.ylabel(fr'$\frac{{w_\mathrm{{p}}^\mathrm{{measured}}}}{{w_{{p}}^\mathrm{{correct}}}}$', fontsize=30)
+    plt.tick_params(axis='both', which='major', labelsize=20)
 
     if xlim is not None:
         plt.xlim(xlim)
     if ylim is not None:
         plt.ylim(ylim)
 
-    plt.legend()
+    plt.legend(fontsize=15)
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
 
@@ -1792,15 +1806,16 @@ def plot_snr(coords: str,
     
     plt.title(fig + " " + kind)
     
-    plt.xlabel(x_label)
-    plt.ylabel(y_label)
+    plt.xlabel(x_label, fontsize=30)
+    plt.ylabel(y_label, fontsize=30)
+    plt.tick_params(axis='both', which='major', labelsize=20)
 
     if xlim is not None:
         plt.xlim(xlim)
     if ylim is not None:
         plt.ylim(ylim)
 
-    plt.legend()
+    plt.legend(fontsize=15)
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
 

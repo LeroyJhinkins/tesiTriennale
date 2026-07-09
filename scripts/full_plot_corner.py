@@ -29,7 +29,7 @@ if len(what_stat_list) != len(data_type_list):
 z_mean_array = [1.0, 1.2, 1.4, 1.65]
 
 if model == 'CLEFT':
-    params_list_full = [r"$h$", r"$A_s$", r"$\omega_c$", r"$1+b_1$", r"$b_2$", r"$bs2$", r"$a_x$", r"$a_v$", r"$a_s$"]
+    params_list_full = [r"$h$", r"$A_s$", r"$\omega_c$", r"$1+b_1$", r"$b_2$", r"$b_{s^2}$", r"$\alpha_\xi$", r"$\alpha_v$", r"$\alpha_\sigma$"]
 elif model == 'CLPT':
     params_list_full = [r"$h$", r"$A_s$", r"$\omega_c$", r"$1+b_1$", r"$b_2$", r"$\sigma_v$"]
 
@@ -95,9 +95,13 @@ for z in redshift_bins:
     g.settings.num_plot_contours = 2
     g.settings.figure_legend_frame = False
     g.settings.line_labels = True
-    g.settings.axes_fontsize = 20
-    g.settings.axes_labelsize = 35
-    g.settings.legend_fontsize = 20
+    g.settings.axes_labelsize = 48
+    if model == 'CLEFT':
+        g.settings.axes_fontsize = 30
+        g.settings.legend_fontsize = 33
+    elif model == 'CLPT':
+        g.settings.axes_fontsize = 23
+        g.settings.legend_fontsize = 23
     g.settings.alpha_filled_add = 0.5
 
     g.triangle_plot(

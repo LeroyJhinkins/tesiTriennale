@@ -38,9 +38,9 @@ Y.~Zhang, W.~Wang, J.~Han, X.~Yang, V.~Rodriguez-Gomez, C.~G. Palau, and Z.~Tan,
 \bibitem{LSEstimator}
 S.~D. {Landy} and A.~S. {Szalay}, ``{Bias and Variance of Angular Correlation Functions},'' \emph{The Astrophysical Journal}, vol. 412, p.~64, Jul. 1993.
 
-\bibitem{RedshiftSpace}
+\bibitem{Kazin1987}
 \BIBentryALTinterwordspacing
-M.~C.~D. Marulli, Veropalumbo, ``{Redshift-space distortions of galaxies, clusters, and AGN - Testing how the accuracy of growth rate measurements depends on scales and sample selections},'' \emph{A\&A 599 A106}, 2017. [Online]. Available: \url{https://doi.org/10.1051/0004-6361/201526885}
+N.~Kaiser, ``Clustering in real space and in redshift space,'' \emph{Monthly Notices of the Royal Astronomical Society}, vol. 227, no.~1, pp. 1--21, 07 1987. [Online]. Available: \url{https://doi.org/10.1093/mnras/227.1.1}
 \BIBentrySTDinterwordspacing
 
 \bibitem{Kazin}
@@ -48,19 +48,44 @@ M.~C.~D. Marulli, Veropalumbo, ``{Redshift-space distortions of galaxies, cluste
 E.~A. Kazin, A.~G. Sánchez, and M.~R. Blanton, ``Improving measurements of h(z) and da(z) by analysing clustering anisotropies,'' \emph{Monthly Notices of the Royal Astronomical Society}, vol. 419, no.~4, pp. 3223--3243, 02 2012. [Online]. Available: \url{https://doi.org/10.1111/j.1365-2966.2011.19962.x}
 \BIBentrySTDinterwordspacing
 
+\bibitem{EuclidPaper}
+\BIBentryALTinterwordspacing
+A.~B. J.~A. Mellier, Y.~Abdurro’uf, Achúcarro \emph{et~al.}, ``<i>euclid</i>: I. overview of the <i>euclid</i> mission,'' \emph{Astronomy \& Astrophysics}, vol. 697, Apr. 2025. [Online]. Available: \url{http://dx.doi.org/10.1051/0004-6361/202450810}
+\BIBentrySTDinterwordspacing
+
+\bibitem{SlitlessSpectroscopy}
+\BIBentryALTinterwordspacing
+K.~and Jahnke, W.~Gillard, M.~Schirmer \emph{et~al.}, ``<i>euclid</i>: Iii. the nisp instrument,'' \emph{Astronomy \& Astrophysics}, vol. 697, p.~A3, Apr. 2025. [Online]. Available: \url{http://dx.doi.org/10.1051/0004-6361/202450786}
+\BIBentrySTDinterwordspacing
+
 \bibitem{WeakLensing}
 \BIBentryALTinterwordspacing
 J.~Prat and D.~Bacon, \emph{Weak gravitational lensing}.\hskip 1em plus 0.5em minus 0.4em\relax Elsevier, 2026, pp. 508--537. [Online]. Available: \url{http://dx.doi.org/10.1016/B978-0-443-21439-4.00071-7}
 \BIBentrySTDinterwordspacing
 
-\bibitem{SlitlessSpectroscopy}
+\bibitem{EisensteinBAO}
 \BIBentryALTinterwordspacing
-X.~Chen, M.~I. Lam, Y.~Zhou, H.~Gu, J.~Lai, Z.~Fan, J.~Li, X.~Zhang, and H.~Tian, ``Slitless spectroscopy source detection using yolo deep neural network,'' 2025. [Online]. Available: \url{https://arxiv.org/abs/2510.10922}
+D.~J. Eisenstein, I.~Zehavi, D.~W. Hogg \emph{et~al.}, ``Detection of the baryon acoustic peak in the large‐scale correlation function of sdss luminous red galaxies,'' \emph{The Astrophysical Journal}, vol. 633, no.~2, pp. 560--574, Nov. 2005. [Online]. Available: \url{http://dx.doi.org/10.1086/466512}
+\BIBentrySTDinterwordspacing
+
+\bibitem{CP_param}
+\BIBentryALTinterwordspacing
+M.~CHEVALLIER and D.~POLARSKI, ``Accelerating universes with scaling dark matter,'' \emph{International Journal of Modern Physics D}, vol.~10, no.~02, pp. 213--223, Apr. 2001. [Online]. Available: \url{http://dx.doi.org/10.1142/S0218271801000822}
+\BIBentrySTDinterwordspacing
+
+\bibitem{L_param}
+\BIBentryALTinterwordspacing
+E.~V. Linder, ``Exploring the expansion history of the universe,'' \emph{Physical Review Letters}, vol.~90, no.~9, Mar. 2003. [Online]. Available: \url{http://dx.doi.org/10.1103/PhysRevLett.90.091301}
+\BIBentrySTDinterwordspacing
+
+\bibitem{IlariaR}
+\BIBentryALTinterwordspacing
+I.~Risso, A.~Veropalumbo, Branchini \emph{et~al.}, ``<i>euclid</i> preparation: Lxxxiii. the impact of redshift interlopers on the two-point correlation function analysis,'' \emph{Astronomy \& Astrophysics}, vol. 707, p. A233, Mar. 2026. [Online]. Available: \url{http://dx.doi.org/10.1051/0004-6361/202555402}
 \BIBentrySTDinterwordspacing
 
 \bibitem{ELM}
 \BIBentryALTinterwordspacing
-P.~Monaco, G.~Parimbelli, M.~Y. Elkhashab, J.~Salvalaggio, and others, ``<i>euclid</i> preparation: Lxxvi. simulating thousands of <i>euclid</i> spectroscopic skies,'' \emph{Astronomy \& Astrophysics}, vol. 704, p. A306, Dec. 2025. [Online]. Available: \url{http://dx.doi.org/10.1051/0004-6361/202556459}
+P.~Monaco, G.~Parimbelli, Elkhashab \emph{et~al.}, ``<i>euclid</i> preparation: Lxxvi. simulating thousands of <i>euclid</i> spectroscopic skies,'' \emph{Astronomy \& Astrophysics}, vol. 704, p. A306, Dec. 2025. [Online]. Available: \url{http://dx.doi.org/10.1051/0004-6361/202556459}
 \BIBentrySTDinterwordspacing
 
 \bibitem{CLPT}
@@ -68,19 +93,50 @@ P.~Monaco, G.~Parimbelli, M.~Y. Elkhashab, J.~Salvalaggio, and others, ``<i>eucl
 J.~Carlson, B.~Reid, and M.~White, ``Convolution lagrangian perturbation theory for biased tracers,'' \emph{Monthly Notices of the Royal Astronomical Society}, vol. 429, no.~2, pp. 1674--1685, Dec. 2012. [Online]. Available: \url{http://dx.doi.org/10.1093/mnras/sts457}
 \BIBentrySTDinterwordspacing
 
+\bibitem{Buchert}
+T.~{Buchert}, ``{A class of solutions in Newtonian cosmology and the pancake theory},'' \emph{Astronomy \& Astrophysics}, vol. 223, no. 1-2, pp. 9--24, Oct. 1989.
+
+\bibitem{Zeldovich}
+Y.~B. {Zel'dovich}, ``{Gravitational instability: An approximate theory for large density perturbations.}'' \emph{Astronomy \& Astrophysics}, vol.~5, pp. 84--89, Mar. 1970.
+
+\bibitem{Matsubara}
+\BIBentryALTinterwordspacing
+T.~Matsubara, ``Resumming cosmological perturbations via the lagrangian picture: One-loop results in real space and in redshift space,'' \emph{Physical Review D}, vol.~77, no.~6, Mar. 2008. [Online]. Available: \url{http://dx.doi.org/10.1103/PhysRevD.77.063530}
+\BIBentrySTDinterwordspacing
+
 \bibitem{CLEFT}
 \BIBentryALTinterwordspacing
 Z.~Vlah, E.~Castorina, and M.~White, ``The gaussian streaming model and convolution lagrangian effective field theory,'' \emph{Journal of Cosmology and Astroparticle Physics}, vol. 2016, no.~12, pp. 007--007, Dec. 2016. [Online]. Available: \url{http://dx.doi.org/10.1088/1475-7516/2016/12/007}
 \BIBentrySTDinterwordspacing
 
-\bibitem{MartinK}
+\bibitem{Porto}
 \BIBentryALTinterwordspacing
-E.~Collaboration, M.~Kärcher, M.~A. Breton, S.~de~la Torre, and others, ``Euclid preparation. galaxy 2-point correlation function modelling in redshift space,'' 2026. [Online]. Available: \url{https://arxiv.org/abs/2601.04780}
+R.~A. Porto, L.~Senatore, and M.~Zaldarriaga, ``The lagrangian-space effective field theory of large scale structures,'' \emph{Journal of Cosmology and Astroparticle Physics}, vol. 2014, no.~05, pp. 022--022, May 2014. [Online]. Available: \url{http://dx.doi.org/10.1088/1475-7516/2014/05/022}
 \BIBentrySTDinterwordspacing
 
-\bibitem{IlariaR}
+\bibitem{Baumann}
 \BIBentryALTinterwordspacing
-I.~Risso, A.~Veropalumbo, E.~Branchini, E.~Maragliano, and others, ``<i>euclid</i> preparation: Lxxxiii. the impact of redshift interlopers on the two-point correlation function analysis,'' \emph{Astronomy \& Astrophysics}, vol. 707, p. A233, Mar. 2026. [Online]. Available: \url{http://dx.doi.org/10.1051/0004-6361/202555402}
+D.~Baumann, A.~Nicolis, L.~Senatore, and M.~Zaldarriaga, ``Cosmological non-linearities as an effective fluid,'' \emph{Journal of Cosmology and Astroparticle Physics}, vol. 2012, no.~07, pp. 051--051, 2012. [Online]. Available: \url{http://dx.doi.org/10.1088/1475-7516/2012/07/051}
+\BIBentrySTDinterwordspacing
+
+\bibitem{CometRef}
+\BIBentryALTinterwordspacing
+J.~Donald-McCann, R.~Gsponer, R.~Zhao, K.~Koyama, and F.~Beutler, ``Analysis of unified galaxy power spectrum multipole measurements,'' \emph{Monthly Notices of the Royal Astronomical Society}, vol. 526, no.~3, pp. 3461--3481, 12 2023. [Online]. Available: \url{https://doi.org/10.1093/mnras/stad2957}
+\BIBentrySTDinterwordspacing
+
+\bibitem{MartinK}
+\BIBentryALTinterwordspacing
+E.~Collaboration, M.~Kärcher, M.~A. Breton, S.~de~la Torre \emph{et~al.}, ``Euclid preparation. galaxy 2-point correlation function modelling in redshift space,'' 2026. [Online]. Available: \url{https://arxiv.org/abs/2601.04780}
+\BIBentrySTDinterwordspacing
+
+\bibitem{Nautilus}
+\BIBentryALTinterwordspacing
+J.~U. Lange, ``{nautilus: boosting Bayesian importance nested sampling with deep learning},'' \emph{Monthly Notices of the Royal Astronomical Society}, vol. 525, no.~2, pp. 3181--3194, 08 2023. [Online]. Available: \url{https://doi.org/10.1093/mnras/stad2441}
+\BIBentrySTDinterwordspacing
+
+\bibitem{Hartlap_2006}
+\BIBentryALTinterwordspacing
+J.~Hartlap, P.~Simon, and P.~Schneider, ``Why your model parameter confidences might be too optimistic. unbiased estimation of the inverse covariance matrix,'' \emph{Astronomy \& Astrophysics}, vol. 464, no.~1, pp. 399--404, Dec. 2006. [Online]. Available: \url{http://dx.doi.org/10.1051/0004-6361:20066170}
 \BIBentrySTDinterwordspacing
 
 \end{thebibliography}

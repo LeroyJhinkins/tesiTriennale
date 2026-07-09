@@ -67,7 +67,7 @@ def plot_FoM_FoB(model,s_min_list,z_mean_array):
 
     fig, axs = plt.subplots(2, 2, figsize=(11, 8), sharex=True, sharey='row')
     
-    fig.suptitle(f'Model: {model}', fontsize=16, fontweight='bold', y=0.98)
+    fig.suptitle(f'Model: {model}', fontsize=27, fontweight='bold', y=0.98)
 
     fom_label = r'$\text{FoM}(h, A_s, \omega_c)$'
     fob_label = r'$\text{FoB}(h, A_s, \omega_c)$'
@@ -76,7 +76,7 @@ def plot_FoM_FoB(model,s_min_list,z_mean_array):
         axs[0, col].set_title(f'$z = {z_val}$', fontsize=13, pad=10)
 
     for row, metric in enumerate(['FoM', 'FoB']):
-        axs[row, 0].set_ylabel(fom_label if metric == 'FoM' else fob_label, fontsize=13)
+        axs[row, 0].set_ylabel(fom_label if metric == 'FoM' else fob_label, fontsize=22)
         
         for col, z_val in enumerate(z_mean_array):
             ax = axs[row, col]
@@ -96,15 +96,15 @@ def plot_FoM_FoB(model,s_min_list,z_mean_array):
                 ax.fill_between(s_min_list, 0, 1.87, color='grey', alpha=0.2) # corresponding to 1 sigma
                 ax.fill_between(s_min_list, 1.87, 2.8, color='grey', alpha=0.08) # corresponding to 2 sigma
                     
-            ax.tick_params(axis='both', which='both', direction='in', top=True, right=True, labelsize=11)
+            ax.tick_params(axis='both', which='both', direction='in', top=True, right=True, labelsize=18)
             ax.set_xticks(s_min_list)
             ax.set_xticklabels(s_min_list)
 
     for col in range(2):
-        axs[1, col].set_xlabel(r'$s_{\text{min}} \, [h^{-1}\text{Mpc}]$', fontsize=13)
+        axs[1, col].set_xlabel(r'$s_{\text{min}} \, [h^{-1}\text{Mpc}]$', fontsize=22)
 
     handles, labels = axs[0, 0].get_legend_handles_labels()
-    fig.legend(handles, labels, loc='upper center', bbox_to_anchor=(0.5, 0.93), ncol=4, frameon=True, fontsize=11)
+    fig.legend(handles, labels, loc='upper center', bbox_to_anchor=(0.5, 0.93), ncol=4, frameon=True, fontsize=15)
 
     plt.tight_layout(rect=[0, 0, 1, 0.89])
     

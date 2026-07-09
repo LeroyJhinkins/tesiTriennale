@@ -1,0 +1,21 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[italian]{babel}
+\usepackage{amsmath}
+\usepackage{lmodern}
+\usepackage{geometry}
+\geometry{a4paper, margin=3cm}
+
+\begin{document}
+
+\section*{Riassunto}
+La missione spaziale \textit{Euclid} mapperà la struttura a grande scala dell'Universo per indagare la natura dell'energia e della materia oscura avvalendosi, tra le altre tecniche, del \textit{galaxy clustering}. Poiché in queste osservazioni le distanze comoventi vengono calcolate tramite misurazioni spettroscopiche del redshift, eventuali errori sistematici nell'identificazione delle linee di emissione introducono i cosiddetti “\textit{interlopers}”, ovvero galassie assegnate a distanze spaziali errate nel catalogo. In questo lavoro di tesi si è valutato l'impatto di tali contaminazioni sulle stime di \textit{clustering} spaziale, verificando in che misura l'adozione di statistiche proiettate possa mitigarne gli effetti sistematici sull'estrazione dei parametri cosmologici.
+
+L'analisi è stata condotta utilizzando un set di $1000$ simulazioni indipendenti estratte dai cataloghi \textit{EuclidLargeMocks} (ELM). Sono stati analizzati e confrontati due distinti set di dati: uno “corretto”, rappresentante la distribuzione cosmologica ideale priva di errori di identificazione delle linee spettrali, e uno “misurato”, contenente popolazioni realistiche di \textit{interlopers}. La funzione di correlazione a due punti (2PCF) è stata compressa in metriche monodimensionali sfruttando due approcci: l'espansione in multipoli di Legendre (monopolo, quadrupolo ed esadecapolo) e la proiezione in \textit{clustering wedges}, parallela e perpendicolare alla linea di vista. Integrando due modelli teorici per il regime non-lineare, la \textit{Convolution Lagrangian Perturbation Theory} (CLPT) e la \textit{Convolution Lagrangian Effective Field Theory} (CLEFT), è stata eseguita inferenza bayesiana per estrarne i corrispondenti parametri cosmologici.
+
+Dai risultati è emerso che gli \textit{interlopers} non alterano il \textit{clustering} cosmologico in modo isotropo. Nel \textit{wedge} perpendicolare, questi agiscono principalmente come un rumore di fondo casuale che sopprime uniformemente l'ampiezza del segnale senza alterarne la forma geometrica, mantenendo intatte caratteristiche peculiari come il picco delle Oscillazioni Acustiche Barioniche (BAO). Al contrario, nel \textit{wedge} parallelo e nell'espansione in multipoli, le distorsioni lungo la linea di vista si propagano rovinando drasticamente il segnale e appiattendo il picco BAO. Per quanto riguarda l'inferenza bayesiana, per entrambi i modelli l'attenuazione indotta dagli \textit{interloper} si traduce in una sottostima sistematica dell'ampiezza di \textit{clustering} primordiale, $A_\text{s}$. I test con soglie di taglio spaziale crescenti ($s_\text{min}$) hanno, inoltre, confermato che mascherare le scale non lineari scarta coppie di galassie riducendo il rapporto segnale-rumore, ma non corregge questa attenuazione sistematica.
+
+Confrontando le prestazioni dei modelli tramite le metriche di \textit{Figure of Merit} (FoM) e \textit{Figure of Bias} (FoB), si evidenzia un netto contrasto tra i metodi di compressione. Sebbene il metodo dei multipoli consenta un'elevata precisione statistica (FoM maggiore di un ordine di grandezza), tale precisione è in realtà fortemente distorta, superando in modo critico le soglie di FoB accettabili. Il \textit{wedge} perpendicolare ha dimostrato invece una stabilità eccezionale: pur rinunciando a un po' di precisione statistica per via dell'esclusione delle informazioni radiali, isola efficacemente l'analisi dalle contaminazioni lungo la linea di vista, restituendo vincoli sui parametri cosmologici accurati e mantenendo un'accuratezza (FoB) elevata per tutte le scale e i range di redshift testati.
+
+\end{document}
