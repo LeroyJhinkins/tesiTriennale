@@ -50,12 +50,12 @@ E.~A. Kazin, A.~G. Sánchez, and M.~R. Blanton, ``Improving measurements of h(z)
 
 \bibitem{EuclidPaper}
 \BIBentryALTinterwordspacing
-A.~B. J.~A. Mellier, Y.~Abdurro’uf, Achúcarro \emph{et~al.}, ``<i>euclid</i>: I. overview of the <i>euclid</i> mission,'' \emph{Astronomy \& Astrophysics}, vol. 697, Apr. 2025. [Online]. Available: \url{http://dx.doi.org/10.1051/0004-6361/202450810}
+A.~B. J.~A. Mellier, Y.~Abdurro’uf, Achúcarro \emph{et~al.}, ``Euclid: I. overview of the euclid mission,'' \emph{Astronomy \& Astrophysics}, vol. 697, Apr. 2025. [Online]. Available: \url{http://dx.doi.org/10.1051/0004-6361/202450810}
 \BIBentrySTDinterwordspacing
 
 \bibitem{SlitlessSpectroscopy}
 \BIBentryALTinterwordspacing
-K.~and Jahnke, W.~Gillard, M.~Schirmer \emph{et~al.}, ``<i>euclid</i>: Iii. the nisp instrument,'' \emph{Astronomy \& Astrophysics}, vol. 697, p.~A3, Apr. 2025. [Online]. Available: \url{http://dx.doi.org/10.1051/0004-6361/202450786}
+K.~and Jahnke, W.~Gillard, M.~Schirmer \emph{et~al.}, ``Euclid: Iii. the nisp instrument,'' \emph{Astronomy \& Astrophysics}, vol. 697, p.~A3, Apr. 2025. [Online]. Available: \url{http://dx.doi.org/10.1051/0004-6361/202450786}
 \BIBentrySTDinterwordspacing
 
 \bibitem{WeakLensing}
@@ -70,7 +70,7 @@ D.~J. Eisenstein, I.~Zehavi, D.~W. Hogg \emph{et~al.}, ``Detection of the baryon
 
 \bibitem{CP_param}
 \BIBentryALTinterwordspacing
-M.~CHEVALLIER and D.~POLARSKI, ``Accelerating universes with scaling dark matter,'' \emph{International Journal of Modern Physics D}, vol.~10, no.~02, pp. 213--223, Apr. 2001. [Online]. Available: \url{http://dx.doi.org/10.1142/S0218271801000822}
+M.~Chevallier and D.~Polarski, ``Accelerating universes with scaling dark matter,'' \emph{International Journal of Modern Physics D}, vol.~10, no.~02, pp. 213--223, Apr. 2001. [Online]. Available: \url{http://dx.doi.org/10.1142/S0218271801000822}
 \BIBentrySTDinterwordspacing
 
 \bibitem{L_param}
@@ -80,12 +80,12 @@ E.~V. Linder, ``Exploring the expansion history of the universe,'' \emph{Physica
 
 \bibitem{IlariaR}
 \BIBentryALTinterwordspacing
-I.~Risso, A.~Veropalumbo, Branchini \emph{et~al.}, ``<i>euclid</i> preparation: Lxxxiii. the impact of redshift interlopers on the two-point correlation function analysis,'' \emph{Astronomy \& Astrophysics}, vol. 707, p. A233, Mar. 2026. [Online]. Available: \url{http://dx.doi.org/10.1051/0004-6361/202555402}
+I.~Risso, A.~Veropalumbo, Branchini \emph{et~al.}, ``Euclid preparation: Lxxxiii. the impact of redshift interlopers on the two-point correlation function analysis,'' \emph{Astronomy \& Astrophysics}, vol. 707, p. A233, Mar. 2026. [Online]. Available: \url{http://dx.doi.org/10.1051/0004-6361/202555402}
 \BIBentrySTDinterwordspacing
 
 \bibitem{ELM}
 \BIBentryALTinterwordspacing
-P.~Monaco, G.~Parimbelli, Elkhashab \emph{et~al.}, ``<i>euclid</i> preparation: Lxxvi. simulating thousands of <i>euclid</i> spectroscopic skies,'' \emph{Astronomy \& Astrophysics}, vol. 704, p. A306, Dec. 2025. [Online]. Available: \url{http://dx.doi.org/10.1051/0004-6361/202556459}
+P.~Monaco, G.~Parimbelli, Elkhashab \emph{et~al.}, ``Euclid preparation: Lxxvi. simulating thousands of euclid spectroscopic skies,'' \emph{Astronomy \& Astrophysics}, vol. 704, p. A306, Dec. 2025. [Online]. Available: \url{http://dx.doi.org/10.1051/0004-6361/202556459}
 \BIBentrySTDinterwordspacing
 
 \bibitem{CLPT}
@@ -137,6 +137,11 @@ J.~U. Lange, ``{nautilus: boosting Bayesian importance nested sampling with deep
 \bibitem{Hartlap_2006}
 \BIBentryALTinterwordspacing
 J.~Hartlap, P.~Simon, and P.~Schneider, ``Why your model parameter confidences might be too optimistic. unbiased estimation of the inverse covariance matrix,'' \emph{Astronomy \& Astrophysics}, vol. 464, no.~1, pp. 399--404, Dec. 2006. [Online]. Available: \url{http://dx.doi.org/10.1051/0004-6361:20066170}
+\BIBentrySTDinterwordspacing
+
+\bibitem{FoM_Wang}
+\BIBentryALTinterwordspacing
+Y.~Wang, ``Figure of merit for dark energy constraints from current observational data,'' \emph{Physical Review D}, vol.~77, no.~12, 2008. [Online]. Available: \url{http://dx.doi.org/10.1103/PhysRevD.77.123525}
 \BIBentrySTDinterwordspacing
 
 \end{thebibliography}

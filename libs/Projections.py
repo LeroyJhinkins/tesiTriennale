@@ -189,7 +189,7 @@ def plot_multipoles(l_values: npt.NDArray[np.int8],
     if ylim is not None:
         plt.ylim(ylim)
 
-    plt.legend(fontsize=15)
+    plt.legend(fontsize=23)
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
     
@@ -286,7 +286,7 @@ def plot_multipoles_rebinVSnot(l_values: npt.NDArray[np.int8],
     if ylim is not None:
         plt.ylim(ylim)
 
-    plt.legend(fontsize=15)
+    plt.legend(fontsize=23)
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
     
@@ -377,7 +377,7 @@ def plot_multipoles_measVScorr(l_values: npt.NDArray[np.int8],
     if ylim is not None:
         plt.ylim(ylim)
 
-    plt.legend(fontsize=15)
+    plt.legend(fontsize=18)
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
     
@@ -459,7 +459,7 @@ def plot_multipoles_ratio(l_values: npt.NDArray[np.int8],
     if ylim is not None:
         plt.ylim(ylim)
 
-    plt.legend(fontsize=15)
+    plt.legend(fontsize=23)
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
     
@@ -598,7 +598,7 @@ def plot_clusteringWedges(n_wedges: int,
     if ylim is not None:
         plt.ylim(ylim)
 
-    plt.legend(fontsize=15)
+    plt.legend(fontsize=23)
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
     
@@ -690,7 +690,7 @@ def plot_clusteringWedges_measVScorr(n_wedges: int,
     if ylim is not None:
         plt.ylim(ylim)
 
-    plt.legend(fontsize=15)
+    plt.legend(fontsize=23)
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
     
@@ -774,7 +774,7 @@ def plot_clusteringWedges_ratio(n_wedges: int,
     if ylim is not None:
         plt.ylim(ylim) # this is necessary because when wedge_correct is near 0, the ratio explodes => so we limit the plot on y-axis
 
-    plt.legend(fontsize=15)
+    plt.legend(fontsize=23)
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
 
@@ -1043,7 +1043,7 @@ def compute_muMax(s_matrix: npt.NDArray[np.float64],
     if ylim is not None:
         plt.ylim(ylim)
 
-    plt.legend(fontsize=15)
+    plt.legend()
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
 
@@ -1154,7 +1154,7 @@ def compute_muMax_ratio(s_matrix: npt.NDArray[np.float64],
     if ylim is not None:
         plt.ylim(ylim)
 
-    plt.legend(fontsize=15)
+    plt.legend()
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
 
@@ -1257,7 +1257,7 @@ def plot_projectedFunction(rp_unique: npt.NDArray[np.float64],
     if ylim is not None:
         plt.ylim(ylim)
 
-    plt.legend(fontsize=15)
+    plt.legend(fontsize=23)
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
     
@@ -1327,7 +1327,7 @@ def plot_projectedFunction_measVScorr(rp_unique: npt.NDArray[np.float64],
     if ylim is not None:
         plt.ylim(ylim)
 
-    plt.legend(fontsize=15)
+    plt.legend(fontsize=23)
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
     
@@ -1394,7 +1394,7 @@ def plot_projectedFunction_ratio(rp_unique: npt.NDArray[np.float64],
     if ylim is not None:
         plt.ylim(ylim) # this is necessary because when wedge_correct is near 0, the ratio explodes => so we limit the plot on y-axis
 
-    plt.legend(fontsize=15)
+    plt.legend(fontsize=23)
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
 
@@ -1614,7 +1614,7 @@ def compute_piMax(rp_matrix: npt.NDArray[np.float64],
     if ylim is not None:
         plt.ylim(ylim)
 
-    plt.legend(fontsize=15)
+    plt.legend()
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
 
@@ -1722,7 +1722,7 @@ def compute_piMax_ratio(rp_matrix: npt.NDArray[np.float64],
     if ylim is not None:
         plt.ylim(ylim)
 
-    plt.legend(fontsize=15)
+    plt.legend()
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
 
@@ -1815,7 +1815,7 @@ def plot_snr(coords: str,
     if ylim is not None:
         plt.ylim(ylim)
 
-    plt.legend(fontsize=15)
+    plt.legend(fontsize=23)
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
 

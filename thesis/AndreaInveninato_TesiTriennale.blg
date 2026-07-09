@@ -1,0 +1,67 @@
+This is BibTeX, Version 0.99d (TeX Live 2025)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: AndreaInveninato_TesiTriennale.aux
+The style file: IEEEtran.bst
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Database file #1: bibliography.bib
+Warning--string name "july" is undefined
+--line 317 of file bibliography.bib
+Warning--string name "june" is undefined
+--line 375 of file bibliography.bib
+-- IEEEtran.bst version 1.14 (2015/08/26) by Michael Shell.
+-- http://www.michaelshell.org/tex/ieeetran/bibtex/
+-- See the "IEEEtran_bst_HOWTO.pdf" manual for usage information.
+Too many commas in name 1 of "Mellier, Y. Abdurro’uf, Acevedo Barroso, J. A. and Achúcarro and others" for entry EuclidPaper
+while executing---line 2403 of file IEEEtran.bst
+Name 3 in "Risso, I. and Veropalumbo, A. and Branchini, and others" has a comma at the end for entry IlariaR
+while executing---line 2403 of file IEEEtran.bst
+Name 3 in "Monaco, P. and Parimbelli, G. and Elkhashab, and others" has a comma at the end for entry ELM
+while executing---line 2403 of file IEEEtran.bst
+
+Done.
+You've used 26 entries,
+            4087 wiz_defined-function locations,
+            1023 strings with 12504 characters,
+and the built_in function-call counts, 19619 in all, are:
+= -- 1732
+> -- 394
+< -- 157
++ -- 226
+- -- 71
+* -- 1026
+:= -- 3264
+add.period$ -- 52
+call.type$ -- 26
+change.case$ -- 24
+chr.to.int$ -- 294
+cite$ -- 26
+duplicate$ -- 1416
+empty$ -- 1420
+format.name$ -- 89
+if$ -- 4490
+int.to.chr$ -- 0
+int.to.str$ -- 26
+missing$ -- 237
+newline$ -- 147
+num.names$ -- 26
+pop$ -- 421
+preamble$ -- 1
+purify$ -- 0
+quote$ -- 2
+skip$ -- 1528
+stack$ -- 0
+substring$ -- 738
+swap$ -- 1239
+text.length$ -- 59
+text.prefix$ -- 0
+top$ -- 5
+type$ -- 26
+warning$ -- 0
+while$ -- 73
+width$ -- 28
+write$ -- 356
+(There were 3 error messages)
